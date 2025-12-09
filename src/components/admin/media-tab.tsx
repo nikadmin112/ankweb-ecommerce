@@ -95,7 +95,7 @@ export function MediaTab() {
       title: video.title,
       description: video.description,
       videoUrl: video.videoUrl,
-      thumbnailUrl: video.thumbnailUrl,
+      thumbnailUrl: video.thumbnailUrl || '',
       duration: video.duration,
       isActive: video.isActive,
     });
