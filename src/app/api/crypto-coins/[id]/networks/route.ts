@@ -7,7 +7,7 @@ export async function POST(
 ) {
   try {
     const body = await request.json();
-    const coin = addNetworkToCoin(params.id, body);
+    const coin = await addNetworkToCoin(params.id, body);
     if (!coin) {
       return NextResponse.json({ error: 'Coin not found' }, { status: 404 });
     }
@@ -29,7 +29,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Network ID required' }, { status: 400 });
     }
     
-    const coin = updateNetwork(params.id, networkId, networkData);
+    const coin = await updateNetwork(params.id, networkId, networkData);
     if (!coin) {
       return NextResponse.json({ error: 'Coin or network not found' }, { status: 404 });
     }
@@ -51,7 +51,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Network ID required' }, { status: 400 });
     }
     
-    const coin = deleteNetwork(params.id, networkId);
+    const coin = await deleteNetwork(params.id, networkId);
     if (!coin) {
       return NextResponse.json({ error: 'Coin or network not found' }, { status: 404 });
     }

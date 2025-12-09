@@ -6,7 +6,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const coin = getCoinById(params.id);
+    const coin = await getCoinById(params.id);
     if (!coin) {
       return NextResponse.json({ error: 'Coin not found' }, { status: 404 });
     }
@@ -22,7 +22,7 @@ export async function PATCH(
 ) {
   try {
     const body = await request.json();
-    const coin = updateCoin(params.id, body);
+    const coin = await updateCoin(params.id, body);
     if (!coin) {
       return NextResponse.json({ error: 'Coin not found' }, { status: 404 });
     }
@@ -37,7 +37,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const success = deleteCoin(params.id);
+    const success = await deleteCoin(params.id);
     if (!success) {
       return NextResponse.json({ error: 'Coin not found' }, { status: 404 });
     }
