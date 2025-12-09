@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+/* Default - Pure black background */
+body {
+  @apply text-white font-body antialiased;
+  background-color: #000000 !important;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Light mode (if enabled) */
+.light body {
+  @apply bg-gray-50 text-gray-900;
+}
+
+a {
+  @apply underline-offset-4 transition-colors duration-150;
+}
+
+a:hover {
+  @apply text-blue-600;
+}
+
+.dark a:hover {
+  @apply text-lilac;
+}
+
+.glow-border {
+  background: linear-gradient(120deg, rgba(168, 85, 247, 0.5), rgba(217, 70, 239, 0.4), rgba(168, 85, 247, 0.5));
+  background-size: 200% 200%;
+  animation: shimmer 6s ease infinite;
+}
+
+.fade-in {
+  animation: fadeIn 0.7s ease forwards;
+}
+
+.fade-out {
+  animation: fadeOut 0.7s ease forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.99);
+  }
+}
+
+/* Scrollbar hide utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Subtle golden outline glow animation */
+@keyframes subtleGoldenGlow {
+  0%, 100% {
+    text-shadow: 
+      0 0 1px rgba(251, 191, 36, 0.4),
+      0 0 2px rgba(251, 191, 36, 0.3),
+      0 0 4px rgba(251, 191, 36, 0.2);
+  }
+  50% {
+    text-shadow: 
+      0 0 2px rgba(251, 191, 36, 0.6),
+      0 0 4px rgba(251, 191, 36, 0.4),
+      0 0 6px rgba(251, 191, 36, 0.3);
+  }
+}
+
+.golden-outline-glow {
+  animation: subtleGoldenGlow 3s ease-in-out infinite;
+}

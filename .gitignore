@@ -1,0 +1,13 @@
+.next
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+dist
+.env.local
+.env*.local
+*.tsbuildinfo
+
+# Local database (exclude from git, keep for development)
+/data
