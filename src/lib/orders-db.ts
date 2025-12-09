@@ -30,6 +30,51 @@ export interface Order {
   notes?: string;
 }
 
+// Map camelCase to snake_case for database
+function toDbOrder(order: any): any {
+  return {
+    order_number: order.orderNumber,
+    customer_id: order.customerId,
+    customer_name: order.customerName,
+    customer_email: order.customerEmail,
+    customer_phone: order.customerPhone,
+    items: order.items,
+    subtotal: order.subtotal,
+    discount: order.discount,
+    total: order.total,
+    status: order.status,
+    promo_code: order.promoCode,
+    payment_method: order.paymentMethod,
+    payment_nationality: order.paymentNationality,
+    payment_screenshot: order.paymentScreenshot,
+    notes: order.notes,
+  };
+}
+
+// Map snake_case from database to camelCase
+function fromDbOrder(dbOrder: any): Order {
+  return {
+    id: dbOrder.id,
+    orderNumber: dbOrder.order_number,
+    customerId: dbOrder.customer_id,
+    customerName: dbOrder.customer_name,
+    customerEmail: dbOrder.customer_email,
+    customerPhone: dbOrder.customer_phone,
+    items: dbOrder.items,
+    subtotal: dbOrder.subtotal,
+    discount: dbOrder.discount,
+    total: dbOrder.total,
+    status: dbOrder.status,
+    promoCode: dbOrder.promo_code,
+    paymentMethod: dbOrder.payment_method,
+    paymentNationality: dbOrder.payment_nationality,
+    paymentScreenshot: dbOrder.payment_screenshot,
+    createdAt: dbOrder.created_at,
+    updatedAt: dbOrder.updated_at,
+    notes: dbOrder.notes,
+  };
+}
+
 export async function getAllOrders(): Promise<Order[]> {
   const supabase = getServiceClient();
   if (!supabase) throw new Error('Supabase client not configured');
@@ -40,7 +85,7 @@ export async function getAllOrders(): Promise<Order[]> {
     .order('created_at', { ascending: false });
 
   if (error) throw error;
-  return data || [];
+  return (data || []).map(fromDbOrder);
 }
 
 export async function getOrderById(id: string): Promise<Order | null> {
@@ -54,7 +99,7 @@ export async function getOrderById(id: string): Promise<Order | null> {
     .single();
 
   if (error) return null;
-  return data;
+  return fromDbOrder(data);
 }
 
 export async function getOrdersByCustomerId(customerId: string): Promise<Order[]> {
@@ -68,21 +113,22 @@ export async function getOrdersByCustomerId(customerId: string): Promise<Order[]
     .order('created_at', { ascending: false });
 
   if (error) throw error;
-  return data || [];
+  return (data || []).map(fromDbOrder);
 }
 
 export async function createOrder(orderData: Omit<Order, 'id' | 'orderNumber' | 'createdAt' | 'updatedAt'>): Promise<Order> {
   const supabase = getServiceClient();
   if (!supabase) throw new Error('Supabase not configured');
 
+  const dbOrder = toDbOrder(orderData);
   const { data, error } = await supabase
     .from('orders')
-    .insert([orderData] as any)
+    .insert([dbOrder] as any)
     .select()
     .single();
 
   if (error) throw error;
-  return data;
+  return fromDbOrder(data);
 }
 
 export async function updateOrderStatus(id: string, status: Order['status'], notes?: string): Promise<Order | null> {
@@ -100,7 +146,7 @@ export async function updateOrderStatus(id: string, status: Order['status'], not
     .single();
 
   if (error) return null;
-  return data;
+  return fromDbOrder(data);
 }
 
 export async function deleteOrder(id: string): Promise<boolean> {
