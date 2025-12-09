@@ -85,10 +85,11 @@ CREATE TABLE orders (
     discount NUMERIC(10, 2) DEFAULT 0,
     total NUMERIC(10, 2) NOT NULL,
     status TEXT NOT NULL DEFAULT 'order-placed',
+    promo_code TEXT,
     payment_method TEXT NOT NULL,
     payment_nationality TEXT NOT NULL,
+    payment_screenshot TEXT,
     notes TEXT,
-    screenshot_url TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
