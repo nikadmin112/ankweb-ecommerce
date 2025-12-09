@@ -12,6 +12,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Special case: Check for admin credentials
+    if (email.toLowerCase() === 'admin') {
+      const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin';
+      if (password === adminPassword) {
+        return NextResponse.json({
+          success: true,
+          user: {
+            id: 'admin-' + Date.now(),
+            email: 'admin@ankweb.com',
+            firstName: 'Admin',
+            lastName: 'User',
+            isAdmin: true,
+          },
+        });
+      } else {
+        return NextResponse.json(
+          { error: 'Invalid admin password' },
+          { status: 401 }
+        );
+      }
+    }
+
     // Validate credentials
     const user = await validateUserCredentials(email, password);
 
