@@ -13,8 +13,8 @@ export type User = {
 
 interface AuthContextValue {
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
-  signup: (firstName: string, lastName: string, email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  signup: (firstName: string, lastName: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   guestCheckout: (firstName: string, lastName: string, email?: string) => void;
   logout: () => void;
 }
@@ -48,42 +48,62 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const api = useMemo<AuthContextValue>(() => {
     const login = async (email: string, password: string) => {
-      // Check for admin credentials
-      if (email.toLowerCase() === 'admin' && password === 'admin') {
-        const adminUser: User = {
-          id: 'admin-' + Date.now(),
-          email: 'admin@ankweb.com',
-          firstName: 'Admin',
-          lastName: 'User',
+      try {
+        // Validate credentials against database
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          return { success: false, error: result.error || 'Invalid credentials' };
+        }
+
+        const authenticatedUser: User = {
+          id: result.user.id,
+          email: result.user.email,
+          firstName: result.user.firstName,
+          lastName: result.user.lastName,
           isGuest: false,
-          isAdmin: true
+          isAdmin: result.user.isAdmin
         };
-        setUser(adminUser);
-        return;
+        setUser(authenticatedUser);
+        return { success: true };
+      } catch (err) {
+        return { success: false, error: 'Login failed. Please try again.' };
       }
-      
-      // Regular user login
-      const mockUser: User = {
-        id: 'user-' + Date.now(),
-        email,
-        firstName: 'Demo',
-        lastName: 'User',
-        isGuest: false,
-        isAdmin: false
-      };
-      setUser(mockUser);
     };
 
     const signup = async (firstName: string, lastName: string, email: string, password: string) => {
-      // TODO: Replace with real Supabase auth
-      const mockUser: User = {
-        id: 'user-' + Date.now(),
-        email,
-        firstName,
-        lastName,
-        isGuest: false
-      };
-      setUser(mockUser);
+      try {
+        const response = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, firstName, lastName }),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          return { success: false, error: result.error || 'Signup failed' };
+        }
+
+        const newUser: User = {
+          id: result.user.id,
+          email: result.user.email,
+          firstName: result.user.firstName,
+          lastName: result.user.lastName,
+          isGuest: false,
+          isAdmin: false
+        };
+        setUser(newUser);
+        return { success: true };
+      } catch (err) {
+        return { success: false, error: 'Signup failed. Please try again.' };
+      }
     };
 
     const guestCheckout = (firstName: string, lastName: string, email?: string) => {

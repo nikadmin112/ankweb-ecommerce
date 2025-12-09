@@ -16,17 +16,16 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    try {
-      await login(email, password);
-      // Redirect admin to admin panel, others to shop
-      if (email.toLowerCase() === 'admin' && password === 'admin') {
-        router.push('/admin');
-      } else {
-        router.push('/shop');
-      }
-    } catch (err) {
-      setError('Invalid email or password');
+    
+    const result = await login(email, password);
+    
+    if (!result.success) {
+      setError(result.error || 'Invalid email or password');
+      return;
     }
+    
+    // Redirect based on user type
+    router.push('/shop');
   };
 
   return (
@@ -52,11 +51,11 @@ export default function LoginPage() {
             </label>
             <input
               id="email"
-              type={email.toLowerCase() === 'admin' ? 'text' : 'email'}
+              type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              placeholder="Enter your email or 'admin'"
+              placeholder="Enter your email"
               className="mt-2 w-full rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-2 text-white placeholder-zinc-600 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500/50"
             />
           </div>

@@ -18,16 +18,19 @@ export default function SignupPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!firstName || !lastName || !password) {
-      setError('First name, last name, and password are required');
+    if (!firstName || !lastName || !email || !password) {
+      setError('All fields are required');
       return;
     }
-    try {
-      await signup(firstName, lastName, email, password);
-      router.push('/shop');
-    } catch (err) {
-      setError('Signup failed. Please try again.');
+    
+    const result = await signup(firstName, lastName, email, password);
+    
+    if (!result.success) {
+      setError(result.error || 'Signup failed. Please try again.');
+      return;
     }
+    
+    router.push('/shop');
   };
 
   return (
@@ -79,13 +82,14 @@ export default function SignupPage() {
 
           <div>
             <label htmlFor="email" className="block text-sm font-semibold text-zinc-400">
-              Email (optional)
+              Email *
             </label>
             <input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              required
               className="mt-2 w-full rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-2 text-white placeholder-zinc-600 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500/50"
             />
           </div>

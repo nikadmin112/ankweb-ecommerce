@@ -7,6 +7,23 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- ================================================
+-- TABLE: users
+-- ================================================
+CREATE TABLE users (
+    id TEXT PRIMARY KEY,
+    email TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    is_admin BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Create index for faster email lookups
+CREATE INDEX idx_users_email ON users(email);
+
+-- ================================================
 -- TABLE: products
 -- ================================================
 CREATE TABLE products (
@@ -170,6 +187,7 @@ CREATE INDEX idx_promo_codes_active ON promo_codes(is_active);
 -- ================================================
 
 -- Enable RLS on all tables
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE offers ENABLE ROW LEVEL SECURITY;
@@ -179,6 +197,13 @@ ALTER TABLE crypto_coins ENABLE ROW LEVEL SECURITY;
 ALTER TABLE crypto_networks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE payment_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE promo_codes ENABLE ROW LEVEL SECURITY;
+
+-- Users: Service role can manage, users can view their own data
+CREATE POLICY "Service role can manage users" ON users
+    FOR ALL USING (auth.role() = 'service_role');
+
+CREATE POLICY "Users can view their own data" ON users
+    FOR SELECT USING (id = current_setting('app.user_id', true));
 
 -- Products: Public read, authenticated write
 CREATE POLICY "Anyone can view active products" ON products
