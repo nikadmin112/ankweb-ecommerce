@@ -77,7 +77,33 @@ INSERT INTO crypto_networks (id, coin_id, name, full_name, deposit_address, crea
     
     -- BNB Networks
     ('net-1765301968407-uuig57iwz', 'coin-bnb', 'BSC', 'BNB Smart Chain (BEP20)', '0x1284ebf089cdb12fd950af769346b845be61ffb4', NOW()),
-    ('net-1765302002095-e6bx9aef4', 'coin-bnb', 'OPBNB', 'opBNB', '0x1284ebf089cdb12fd950af769346b845be61ffb4', NOW());
+    ('net-1765302009052-szl0web19', 'coin-bnb', 'OPBNB', 'opBNB', '0x1284ebf089cdb12fd950af769346b845be61ffb4', NOW()),
+    
+    -- BTC Networks
+    ('net-1765302042032-eacrj984y', 'coin-btc', 'BSC', 'BNB Smart Chain (BEP20)', '0x1284ebf089cdb12fd950af769346b845be61ffb4', NOW()),
+    ('net-1765302065713-7e92wv0ww', 'coin-btc', 'BTC', 'Bitcoin', '1ABfnRUSPksVAp7zkkiS13bKUY9E4KqCfo', NOW()),
+    
+    -- TON Networks
+    ('net-1765302141021-egnk4gab0', 'coin-ton', 'TON', 'The Open Network (TON)', 'UQC-pr9qhXCJd4EIN-7dM9Tyz3RKBTotsoH8h5NEozcKz7ej', NOW()),
+    
+    -- ETH Networks
+    ('net-1765302182246-3hbv3drie', 'coin-eth', 'BSC', 'BNB Smart Chain (BEP20)', '0x1284ebf089cdb12fd950af769346b845be61ffb4', NOW()),
+    ('net-1765302226272-k7ifm3ir1', 'coin-eth', 'ARBITRUM', 'Arbitrum One', '0x1284ebf089cdb12fd950af769346b845be61ffb4', NOW()),
+    ('net-1765302252715-l91pw4hvr', 'coin-eth', 'ETH', 'Ethereum (ERC20)', '0x1284ebf089cdb12fd950af769346b845be61ffb4', NOW()),
+    
+    -- DOG Networks
+    ('net-1765302113653-0qfnwn58t', 'coin-dog', 'TON', 'The Open Network (TON)', 'UQC-pr9qhXCJd4EIN-7dM9Tyz3RKBTotsoH8h5NEozcKz7ej', NOW()),
+    
+    -- CATI Networks
+    ('net-1765302282553-ekj98642u', 'coin-cati', 'TON', 'The Open Network (TON)', 'UQC-pr9qhXCJd4EIN-7dM9Tyz3RKBTotsoH8h5NEozcKz7ej', NOW()),
+    
+    -- SOL Networks
+    ('net-1765302303907-lauellagq', 'coin-sol', 'BSC', 'BNB Smart Chain (BEP20)', '0x1284ebf089cdb12fd950af769346b845be61ffb4', NOW()),
+    ('net-1765302328004-2rkobtcoh', 'coin-sol', 'SOL', 'Solana', 'E9vF3udL9ANkmavTNkss1VMTX6rz66mGeBio2427HJk2', NOW()),
+    
+    -- XRP Networks
+    ('net-1765302353455-gjfsravwd', 'coin-xrp', 'BSC', 'BNB Smart Chain (BEP20)', '0x1284ebf089cdb12fd950af769346b845be61ffb4', NOW()),
+    ('net-1765302378419-dlv9nrns2', 'coin-xrp', 'ETH', 'Ethereum (ERC20)', '0x1284ebf089cdb12fd950af769346b845be61ffb4', NOW());
 
 -- ================================================
 -- VERIFICATION QUERIES
