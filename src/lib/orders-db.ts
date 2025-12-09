@@ -1,9 +1,4 @@
-import fs from 'fs/promises';
-import path from 'path';
-import { randomUUID } from 'crypto';
-
-const DATA_DIR = path.join(process.cwd(), 'data');
-const ORDERS_FILE = path.join(DATA_DIR, 'orders.json');
+import { getServiceClient } from './supabase';
 
 export interface OrderItem {
   id: string;
@@ -35,87 +30,87 @@ export interface Order {
   notes?: string;
 }
 
-async function ensureDataDir() {
-  try {
-    await fs.mkdir(DATA_DIR, { recursive: true });
-  } catch (err) {
-    console.error('Failed to create data directory:', err);
-  }
-}
-
-async function readOrders(): Promise<Order[]> {
-  await ensureDataDir();
-  try {
-    const data = await fs.readFile(ORDERS_FILE, 'utf-8');
-    return JSON.parse(data);
-  } catch (err) {
-    return [];
-  }
-}
-
-async function writeOrders(orders: Order[]) {
-  await ensureDataDir();
-  await fs.writeFile(ORDERS_FILE, JSON.stringify(orders, null, 2), 'utf-8');
-}
-
 export async function getAllOrders(): Promise<Order[]> {
-  return readOrders();
+  const supabase = getServiceClient();
+  if (!supabase) throw new Error('Supabase client not configured');
+
+  const { data, error } = await supabase
+    .from('orders')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
 }
 
 export async function getOrderById(id: string): Promise<Order | null> {
-  const orders = await readOrders();
-  return orders.find((o) => o.id === id) || null;
+  const supabase = getServiceClient();
+  if (!supabase) throw new Error('Supabase client not configured');
+
+  const { data, error} = await supabase
+    .from('orders')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) return null;
+  return data;
 }
 
 export async function getOrdersByCustomerId(customerId: string): Promise<Order[]> {
-  const orders = await readOrders();
-  return orders.filter((o) => o.customerId === customerId).sort((a, b) => 
-    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
+  const supabase = getServiceClient();
+  if (!supabase) throw new Error('Supabase client not configured');
+
+  const { data, error } = await supabase
+    .from('orders')
+    .select('*')
+    .eq('customer_id', customerId)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
 }
 
 export async function createOrder(orderData: Omit<Order, 'id' | 'orderNumber' | 'createdAt' | 'updatedAt'>): Promise<Order> {
-  const orders = await readOrders();
-  
-  // Generate order number (e.g., ORD-20231208-001)
-  const date = new Date();
-  const dateStr = date.toISOString().split('T')[0].replace(/-/g, '');
-  const orderCount = orders.filter(o => o.orderNumber.includes(dateStr)).length + 1;
-  const orderNumber = `ORD-${dateStr}-${String(orderCount).padStart(3, '0')}`;
-  
-  const newOrder: Order = {
-    ...orderData,
-    id: randomUUID(),
-    orderNumber,
-    createdAt: date.toISOString(),
-    updatedAt: date.toISOString(),
-  };
+  const supabase = getServiceClient();
+  if (!supabase) throw new Error('Supabase client not configured');
 
-  orders.push(newOrder);
-  await writeOrders(orders);
-  return newOrder;
+  const { data, error } = await supabase
+    .from('orders')
+    .insert([orderData])
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
 }
 
 export async function updateOrderStatus(id: string, status: Order['status'], notes?: string): Promise<Order | null> {
-  const orders = await readOrders();
-  const index = orders.findIndex((o) => o.id === id);
-  
-  if (index === -1) return null;
-  
-  orders[index].status = status;
-  orders[index].updatedAt = new Date().toISOString();
-  if (notes) orders[index].notes = notes;
-  
-  await writeOrders(orders);
-  return orders[index];
+  const supabase = getServiceClient();
+  if (!supabase) throw new Error('Supabase client not configured');
+
+  const updates: any = { status };
+  if (notes) updates.notes = notes;
+
+  const { data, error } = await supabase
+    .from('orders')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) return null;
+  return data;
 }
 
 export async function deleteOrder(id: string): Promise<boolean> {
-  const orders = await readOrders();
-  const filtered = orders.filter((o) => o.id !== id);
-  
-  if (filtered.length === orders.length) return false;
-  
-  await writeOrders(filtered);
-  return true;
+  const supabase = getServiceClient();
+  if (!supabase) throw new Error('Supabase client not configured');
+
+  const { error } = await supabase
+    .from('orders')
+    .delete()
+    .eq('id', id);
+
+  return !error;
 }

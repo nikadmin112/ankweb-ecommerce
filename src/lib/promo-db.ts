@@ -1,63 +1,69 @@
-import fs from 'fs/promises';
-import path from 'path';
-
-const PROMO_PATH = path.join(process.cwd(), 'data', 'promo-codes.json');
+import { getServiceClient } from './supabase';
 
 export interface PromoCode {
   id: string;
   code: string;
-  type: 'percentage' | 'bogo' | 'free_service';
-  value: string;
-  description?: string;
-  minCartValue?: number;
+  discount_type: 'percentage' | 'fixed';
+  discount_value: number;
+  usage_limit?: number;
+  used_count?: number;
+  is_active: boolean;
+  valid_from?: string;
+  valid_until?: string;
   created_at?: string;
-}
-
-async function ensurePromoCodesExists() {
-  try {
-    const dir = path.dirname(PROMO_PATH);
-    await fs.mkdir(dir, { recursive: true });
-    
-    try {
-      await fs.access(PROMO_PATH);
-    } catch {
-      await fs.writeFile(PROMO_PATH, JSON.stringify([], null, 2));
-    }
-  } catch (error) {
-    console.error('Error ensuring promo codes file exists:', error);
-    throw error;
-  }
+  updated_at?: string;
 }
 
 export async function getAllPromoCodes(): Promise<PromoCode[]> {
-  await ensurePromoCodesExists();
-  const data = await fs.readFile(PROMO_PATH, 'utf-8');
-  return JSON.parse(data);
+  const supabase = getServiceClient();
+  if (!supabase) throw new Error('Supabase client not configured');
+
+  const { data, error } = await supabase
+    .from('promo_codes')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
 }
 
 export async function getPromoCodeByCode(code: string): Promise<PromoCode | null> {
-  const promoCodes = await getAllPromoCodes();
-  return promoCodes.find(p => p.code.toUpperCase() === code.toUpperCase()) || null;
+  const supabase = getServiceClient();
+  if (!supabase) throw new Error('Supabase client not configured');
+
+  const { data, error } = await supabase
+    .from('promo_codes')
+    .select('*')
+    .eq('code', code.toUpperCase())
+    .eq('is_active', true)
+    .single();
+
+  if (error) return null;
+  return data;
 }
 
-export async function createPromoCode(promo: Omit<PromoCode, 'id' | 'created_at'>): Promise<PromoCode> {
-  const promoCodes = await getAllPromoCodes();
-  const newPromo: PromoCode = {
-    ...promo,
-    id: Date.now().toString(),
-    created_at: new Date().toISOString()
-  };
-  promoCodes.push(newPromo);
-  await fs.writeFile(PROMO_PATH, JSON.stringify(promoCodes, null, 2));
-  return newPromo;
+export async function createPromoCode(promo: Omit<PromoCode, 'id' | 'created_at' | 'updated_at'>): Promise<PromoCode> {
+  const supabase = getServiceClient();
+  if (!supabase) throw new Error('Supabase client not configured');
+
+  const { data, error } = await supabase
+    .from('promo_codes')
+    .insert([promo])
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
 }
 
 export async function deletePromoCode(id: string): Promise<boolean> {
-  const promoCodes = await getAllPromoCodes();
-  const filtered = promoCodes.filter(p => p.id !== id);
-  
-  if (filtered.length === promoCodes.length) return false;
-  
-  await fs.writeFile(PROMO_PATH, JSON.stringify(filtered, null, 2));
-  return true;
+  const supabase = getServiceClient();
+  if (!supabase) throw new Error('Supabase client not configured');
+
+  const { error } = await supabase
+    .from('promo_codes')
+    .delete()
+    .eq('id', id);
+
+  return !error;
 }
