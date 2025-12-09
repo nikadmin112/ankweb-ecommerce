@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getOrderById, updateOrderStatus } from '@/lib/orders-db';
-import { readFile, writeFile } from 'fs/promises';
-import path from 'path';
+import { getServiceClient } from '@/lib/supabase';
 
 export async function POST(request: Request) {
   try {
@@ -11,27 +9,30 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Get current order
-    const order = await getOrderById(orderId);
-    if (!order) {
-      return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+    const supabase = getServiceClient();
+    if (!supabase) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 500 });
     }
 
-    // Update order with screenshot URL
-    const ordersPath = path.join(process.cwd(), 'data', 'orders.json');
-    const ordersData = await readFile(ordersPath, 'utf-8');
-    const orders = JSON.parse(ordersData);
-    
-    const orderIndex = orders.findIndex((o: any) => o.id === orderId);
-    if (orderIndex === -1) {
-      return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+    // Update order with screenshot URL and status
+    const { data, error } = await supabase
+      .from('orders')
+      .update({
+        payment_screenshot: screenshotUrl,
+        status: 'payment-done',
+      })
+      .eq('id', orderId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Failed to update order:', error);
+      return NextResponse.json({ error: 'Failed to update order' }, { status: 500 });
     }
 
-    orders[orderIndex].paymentScreenshot = screenshotUrl;
-    orders[orderIndex].status = 'payment-done';
-    orders[orderIndex].updatedAt = new Date().toISOString();
-
-    await writeFile(ordersPath, JSON.stringify(orders, null, 2));
+    if (!data) {
+      return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+    }
 
     return NextResponse.json({ 
       success: true, 

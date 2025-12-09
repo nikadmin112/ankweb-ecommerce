@@ -120,7 +120,14 @@ export async function createOrder(orderData: Omit<Order, 'id' | 'orderNumber' | 
   const supabase = getServiceClient();
   if (!supabase) throw new Error('Supabase not configured');
 
-  const dbOrder = toDbOrder(orderData);
+  // Generate order number
+  const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+  
+  const dbOrder = toDbOrder({
+    ...orderData,
+    orderNumber,
+  });
+  
   const { data, error } = await supabase
     .from('orders')
     .insert([dbOrder] as any)
