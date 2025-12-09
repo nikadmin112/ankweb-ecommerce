@@ -6,7 +6,7 @@ export async function GET(
   { params }: { params: { method: string } }
 ) {
   try {
-    const setting = getSettingByMethod(params.method);
+    const setting = await getSettingByMethod(params.method);
     if (!setting) {
       return NextResponse.json({ error: 'Setting not found' }, { status: 404 });
     }

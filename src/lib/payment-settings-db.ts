@@ -1,5 +1,4 @@
-import { readFileSync, writeFileSync } from 'fs';
-import { join } from 'path';
+import { getServiceClient } from './supabase';
 
 export interface BankDetails {
   accountHolderName: string;
@@ -19,57 +18,82 @@ export interface PaymentSettings {
   updatedAt: string;
 }
 
-const settingsFilePath = join(process.cwd(), 'data', 'payment-settings.json');
-
-function readSettings(): PaymentSettings[] {
-  try {
-    const data = readFileSync(settingsFilePath, 'utf-8');
-    return JSON.parse(data);
-  } catch (error) {
-    return [];
-  }
-}
-
-function writeSettings(settings: PaymentSettings[]): void {
-  writeFileSync(settingsFilePath, JSON.stringify(settings, null, 2));
-}
-
-export function getAllSettings(): PaymentSettings[] {
-  return readSettings();
-}
-
-export function getSettingByMethod(method: string): PaymentSettings | null {
-  const settings = readSettings();
-  return settings.find(s => s.id === method) || null;
-}
-
-export function updateSetting(settingData: Omit<PaymentSettings, 'updatedAt'>): PaymentSettings {
-  const settings = readSettings();
-  const index = settings.findIndex(s => s.id === settingData.id);
-  
-  const updatedSetting: PaymentSettings = {
-    ...settingData,
-    updatedAt: new Date().toISOString(),
+function fromDbSetting(dbSetting: any): PaymentSettings {
+  return {
+    id: dbSetting.id,
+    method: dbSetting.method,
+    upiId: dbSetting.upi_id,
+    bankDetails: dbSetting.bank_details,
+    email: dbSetting.email,
+    cryptoAddress: dbSetting.crypto_address,
+    cryptoNetwork: dbSetting.crypto_network,
+    updatedAt: dbSetting.updated_at,
   };
-  
-  if (index >= 0) {
-    settings[index] = updatedSetting;
-  } else {
-    settings.push(updatedSetting);
-  }
-  
-  writeSettings(settings);
-  return updatedSetting;
 }
 
-export function deleteSetting(id: string): boolean {
-  const settings = readSettings();
-  const filtered = settings.filter(s => s.id !== id);
-  
-  if (filtered.length === settings.length) {
-    return false;
-  }
-  
-  writeSettings(filtered);
-  return true;
+function toDbSetting(setting: any): any {
+  return {
+    id: setting.id,
+    method: setting.method,
+    upi_id: setting.upiId,
+    bank_details: setting.bankDetails,
+    email: setting.email,
+    crypto_address: setting.cryptoAddress,
+    crypto_network: setting.cryptoNetwork,
+  };
+}
+
+export async function getAllSettings(): Promise<PaymentSettings[]> {
+  const supabase = getServiceClient();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from('payment_settings')
+    .select('*')
+    .order('updated_at', { ascending: false });
+
+  if (error || !data) return [];
+  return data.map(fromDbSetting);
+}
+
+export async function getSettingByMethod(method: string): Promise<PaymentSettings | null> {
+  const supabase = getServiceClient();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from('payment_settings')
+    .select('*')
+    .eq('id', method)
+    .single();
+
+  if (error || !data) return null;
+  return fromDbSetting(data);
+}
+
+export async function updateSetting(settingData: Omit<PaymentSettings, 'updatedAt'>): Promise<PaymentSettings> {
+  const supabase = getServiceClient();
+  if (!supabase) throw new Error('Supabase not configured');
+
+  const dbSetting = toDbSetting(settingData);
+
+  const { data, error } = await supabase
+    .from('payment_settings')
+    .upsert([dbSetting] as any)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return fromDbSetting(data);
+}
+
+export async function deleteSetting(id: string): Promise<boolean> {
+  const supabase = getServiceClient();
+  if (!supabase) return false;
+
+  const { error } = await supabase
+    .from('payment_settings')
+    .delete()
+    .eq('id', id);
+
+  return !error;
 }
