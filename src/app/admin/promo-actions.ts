@@ -26,16 +26,15 @@ export async function setProductDiscountAction(formData: FormData) {
 
 export async function createPromoCodeAction(formData: FormData) {
   const code = (formData.get('code') as string).toUpperCase();
-  const type = formData.get('type') as 'percentage' | 'bogo' | 'free_service';
-  const value = formData.get('value') as string;
-  const description = formData.get('description') as string;
-  const minCartValue = Number(formData.get('minCartValue')) || undefined;
+  const discount_type = formData.get('type') as 'percentage' | 'fixed';
+  const discount_value = Number(formData.get('value')) || 0;
+  const is_active = true;
 
-  if (!code || !type || !value) {
+  if (!code || !discount_type || !discount_value) {
     throw new Error('Code, type, and value are required');
   }
 
-  await createPromoCode({ code, type, value, description, minCartValue });
+  await createPromoCode({ code, discount_type, discount_value, is_active });
   revalidatePath('/admin');
 }
 
