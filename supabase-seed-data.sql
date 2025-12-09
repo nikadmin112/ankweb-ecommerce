@@ -6,66 +6,54 @@
 -- ================================================
 -- SEED: Categories
 -- ================================================
+-- Delete existing categories first to avoid conflicts
+DELETE FROM categories;
+
 INSERT INTO categories (id, name, icon, created_at, updated_at) VALUES
     ('1765133422767', 'Video Call', 'Camera', '2025-12-07T18:50:22.767Z', '2025-12-07T18:50:22.767Z'),
-    ('1765138382079', 'test', 'Gift', '2025-12-07T20:13:02.079Z', '2025-12-07T20:13:02.079Z')
-ON CONFLICT (id) DO UPDATE SET
-    name = EXCLUDED.name,
-    icon = EXCLUDED.icon,
-    updated_at = EXCLUDED.updated_at;
+    ('1765138382079', 'Test Category', 'Gift', '2025-12-07T20:13:02.079Z', '2025-12-07T20:13:02.079Z');
 
 -- ================================================
 -- SEED: Products
 -- ================================================
+-- Delete existing products first
+DELETE FROM products;
+
 INSERT INTO products (id, name, description, full_description, price, discount, badge, category, image, rating, review_count, created_at, updated_at) VALUES
-    ('1765133828690', 'Video Call', 'Video call for 10 Mins', 'Very good call\n100 Gurantee', 499, 100, 'New', 'Video Call', 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800', 4.5, 458, '2025-12-07T18:57:08.690Z', '2025-12-08T17:55:59.299Z'),
+    ('1765133828690', 'Video Call - 10 Minutes', 'Video call for 10 Mins', 'Very good call\n100 Gurantee', 499, 100, 'New', 'Video Call', 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800', 4.5, 458, '2025-12-07T18:57:08.690Z', '2025-12-08T17:55:59.299Z'),
     ('1765134739560', 'Premium Group', 'Best premium Group', '3000+ Videos', 799, 99, 'Limited', 'Video Call', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8Z2lybHN8ZW58MHx8MHx8fDA%3D', 4.8, 1247, '2025-12-07T19:12:19.560Z', '2025-12-08T17:56:08.719Z'),
-    ('1765216624884', 'Video Call 1', 'VC', NULL, 299, 99, 'New', 'Video Call', 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800', 4.5, 265, '2025-12-08T17:57:04.884Z', '2025-12-08T17:57:04.884Z')
-ON CONFLICT (id) DO UPDATE SET
-    name = EXCLUDED.name,
-    description = EXCLUDED.description,
-    full_description = EXCLUDED.full_description,
-    price = EXCLUDED.price,
-    discount = EXCLUDED.discount,
-    badge = EXCLUDED.badge,
-    category = EXCLUDED.category,
-    image = EXCLUDED.image,
-    rating = EXCLUDED.rating,
-    review_count = EXCLUDED.review_count,
-    updated_at = EXCLUDED.updated_at;
+    ('1765216624884', 'Video Call - Quick', 'VC', NULL, 299, 99, 'New', 'Video Call', 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800', 4.5, 265, '2025-12-08T17:57:04.884Z', '2025-12-08T17:57:04.884Z');
 
 -- ================================================
 -- SEED: Offers
 -- ================================================
+-- Delete existing offers first
+DELETE FROM offers;
+
 INSERT INTO offers (id, title, description, image, link, created_at, updated_at) VALUES
     ('1', 'Special Offer', 'Get 20% off on all services', 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800', '/shop', '2025-12-07T18:29:15.893Z', '2025-12-07T18:29:15.893Z'),
     ('2', 'Limited Time Deal', 'Premium packages at exclusive prices', 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800', '/shop', '2025-12-07T18:29:15.893Z', '2025-12-07T18:29:15.893Z'),
-    ('3', 'New Services', 'Explore our latest offerings', 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800', '/shop', '2025-12-07T18:29:15.893Z', '2025-12-07T18:29:15.893Z')
-ON CONFLICT (id) DO UPDATE SET
-    title = EXCLUDED.title,
-    description = EXCLUDED.description,
-    image = EXCLUDED.image,
-    link = EXCLUDED.link,
-    updated_at = EXCLUDED.updated_at;
+    ('3', 'New Services', 'Explore our latest offerings', 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800', '/shop', '2025-12-07T18:29:15.893Z', '2025-12-07T18:29:15.893Z');
 
 -- ================================================
 -- SEED: Payment Settings
 -- ================================================
+-- Delete existing payment settings first
+DELETE FROM payment_settings;
+
 INSERT INTO payment_settings (id, method, email, upi_id, bank_details, updated_at) VALUES
     ('gift-card', 'amazonGiftCard', 'ankiitasharmmaa@gmail.com', NULL, NULL, '2025-12-09T00:00:00.000Z'),
     ('remitly', 'remitly', NULL, 'test@ybl', 
      '{"accountHolderName": "Jhon Doe", "accountNumber": "123456789", "ifscCode": "ABCD111111", "address": "15 WING C DREM REC"}'::jsonb, 
-     '2025-12-09T16:28:56.061Z')
-ON CONFLICT (id) DO UPDATE SET
-    method = EXCLUDED.method,
-    email = EXCLUDED.email,
-    upi_id = EXCLUDED.upi_id,
-    bank_details = EXCLUDED.bank_details,
-    updated_at = EXCLUDED.updated_at;
+     '2025-12-09T16:28:56.061Z');
 
 -- ================================================
 -- SEED: Crypto Coins
 -- ================================================
+-- Delete existing crypto data first (cascades to networks)
+DELETE FROM crypto_networks;
+DELETE FROM crypto_coins;
+
 INSERT INTO crypto_coins (id, symbol, name, display_name, created_at, updated_at) VALUES
     ('coin-usdt', 'USDT', 'TetherUS', 'USDT TetherUS', '2025-12-09T00:00:00.000Z', '2025-12-09T00:00:00.000Z'),
     ('coin-bnb', 'BNB', 'BNB', 'BNB', '2025-12-09T00:00:00.000Z', '2025-12-09T00:00:00.000Z'),
@@ -75,12 +63,7 @@ INSERT INTO crypto_coins (id, symbol, name, display_name, created_at, updated_at
     ('coin-dog', 'DOG', 'Dogs', 'DOG Dogs', '2025-12-09T00:00:00.000Z', '2025-12-09T00:00:00.000Z'),
     ('coin-cati', 'CATI', 'Catizen', 'CATI Catizen', '2025-12-09T00:00:00.000Z', '2025-12-09T00:00:00.000Z'),
     ('coin-sol', 'SOL', 'Solana', 'SOL Solana', '2025-12-09T00:00:00.000Z', '2025-12-09T00:00:00.000Z'),
-    ('coin-xrp', 'XRP', 'XRP', 'XRP', '2025-12-09T00:00:00.000Z', '2025-12-09T00:00:00.000Z')
-ON CONFLICT (id) DO UPDATE SET
-    symbol = EXCLUDED.symbol,
-    name = EXCLUDED.name,
-    display_name = EXCLUDED.display_name,
-    updated_at = EXCLUDED.updated_at;
+    ('coin-xrp', 'XRP', 'XRP', 'XRP', '2025-12-09T00:00:00.000Z', '2025-12-09T00:00:00.000Z');
 
 -- ================================================
 -- SEED: Crypto Networks
@@ -94,8 +77,7 @@ INSERT INTO crypto_networks (id, coin_id, name, full_name, deposit_address, crea
     
     -- BNB Networks
     ('net-1765301968407-uuig57iwz', 'coin-bnb', 'BSC', 'BNB Smart Chain (BEP20)', '0x1284ebf089cdb12fd950af769346b845be61ffb4', NOW()),
-    ('net-1765302002095-e6bx9aef4', 'coin-bnb', 'OPBNB', 'opBNB', '0x1284ebf089cdb12fd950af769346b845be61ffb4', NOW())
-ON CONFLICT (id) DO NOTHING;
+    ('net-1765302002095-e6bx9aef4', 'coin-bnb', 'OPBNB', 'opBNB', '0x1284ebf089cdb12fd950af769346b845be61ffb4', NOW());
 
 -- ================================================
 -- VERIFICATION QUERIES
