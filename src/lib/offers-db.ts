@@ -43,7 +43,7 @@ export async function createOffer(offer: Omit<Offer, 'id' | 'created_at' | 'upda
 
   const { data, error } = await supabase
     .from('offers')
-    .insert([offer])
+    .insert([offer] as any)
     .select()
     .single();
 
@@ -57,7 +57,7 @@ export async function updateOffer(id: string, updates: Partial<Omit<Offer, 'id' 
 
   const { data, error } = await supabase
     .from('offers')
-    .update(updates)
+    .update(updates as any)
     .eq('id', id)
     .select()
     .single();

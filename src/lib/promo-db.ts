@@ -48,7 +48,7 @@ export async function createPromoCode(promo: Omit<PromoCode, 'id' | 'created_at'
 
   const { data, error } = await supabase
     .from('promo_codes')
-    .insert([promo])
+    .insert([promo] as any)
     .select()
     .single();
 

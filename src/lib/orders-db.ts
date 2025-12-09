@@ -73,11 +73,11 @@ export async function getOrdersByCustomerId(customerId: string): Promise<Order[]
 
 export async function createOrder(orderData: Omit<Order, 'id' | 'orderNumber' | 'createdAt' | 'updatedAt'>): Promise<Order> {
   const supabase = getServiceClient();
-  if (!supabase) throw new Error('Supabase client not configured');
+  if (!supabase) throw new Error('Supabase not configured');
 
   const { data, error } = await supabase
     .from('orders')
-    .insert([orderData])
+    .insert([orderData] as any)
     .select()
     .single();
 
@@ -94,7 +94,7 @@ export async function updateOrderStatus(id: string, status: Order['status'], not
 
   const { data, error } = await supabase
     .from('orders')
-    .update(updates)
+    .update(updates as any)
     .eq('id', id)
     .select()
     .single();

@@ -39,7 +39,7 @@ export async function createProduct(product: Omit<LocalProduct, 'id' | 'created_
 
   const { data, error } = await supabase
     .from('products')
-    .insert([product])
+    .insert([product] as any)
     .select()
     .single();
 
@@ -53,7 +53,7 @@ export async function updateProduct(id: string, updates: Partial<Omit<LocalProdu
 
   const { data, error } = await supabase
     .from('products')
-    .update(updates)
+    .update(updates as any)
     .eq('id', id)
     .select()
     .single();
