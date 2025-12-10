@@ -326,7 +326,7 @@ export default function CartPage() {
             </div>
 
             <Link
-              href="/checkout"
+              href={appliedPromo ? `/checkout?promo=${appliedPromo.code}` : '/checkout'}
               className="mt-6 block w-full rounded-lg bg-purple-600 border border-purple-500 px-4 py-3 text-center text-sm font-semibold text-white shadow-lg shadow-purple-500/20 transition hover:bg-purple-500"
             >
               Proceed to Checkout

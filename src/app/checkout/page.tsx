@@ -33,6 +33,7 @@ export default function CheckoutPage() {
   const [selectedCoin, setSelectedCoin] = useState<any>(null);
   const [selectedNetwork, setSelectedNetwork] = useState<any>(null);
   const [upiSettings, setUpiSettings] = useState<any>(null);
+  const [appliedPromo, setAppliedPromo] = useState<any>(null);
   
   const [formData, setFormData] = useState({
     fullName: user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : '',
@@ -47,6 +48,51 @@ export default function CheckoutPage() {
     const itemPrice = item.discount ? item.price * (1 - item.discount / 100) : item.price;
     return sum + itemPrice * item.quantity;
   }, 0);
+
+  // Calculate discount from promo
+  let discount = 0;
+  if (appliedPromo) {
+    if (appliedPromo.discount_type === 'percentage') {
+      discount = (subtotal * Number(appliedPromo.discount_value)) / 100;
+    } else if (appliedPromo.discount_type === 'fixed') {
+      discount = Number(appliedPromo.discount_value);
+    } else if (appliedPromo.discount_type === 'bogo' && items.length >= 2) {
+      const sortedByPrice = [...items].sort((a, b) => {
+        const priceA = a.discount ? a.price * (1 - a.discount / 100) : a.price;
+        const priceB = b.discount ? b.price * (1 - b.discount / 100) : b.price;
+        return priceA - priceB;
+      });
+      const cheapestItem = sortedByPrice[0];
+      const cheapestPrice = cheapestItem.discount ? cheapestItem.price * (1 - cheapestItem.discount / 100) : cheapestItem.price;
+      discount = cheapestPrice;
+    } else if (appliedPromo.discount_type === 'free_service' && appliedPromo.free_product_id) {
+      const freeProduct = items.find(i => i.id === appliedPromo.free_product_id);
+      if (freeProduct) {
+        const freePrice = freeProduct.discount ? freeProduct.price * (1 - freeProduct.discount / 100) : freeProduct.price;
+        discount = freePrice;
+      }
+    }
+  }
+
+  const total = Math.max(0, subtotal - discount);
+
+  // Fetch promo code from URL and validate it
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const promoCode = params.get('promo');
+    if (promoCode) {
+      fetch('/api/promo-codes')
+        .then(res => res.json())
+        .then(promoCodes => {
+          const promo = promoCodes.find((p: any) => p.code.toUpperCase() === promoCode.toUpperCase());
+          if (promo) {
+            setAppliedPromo(promo);
+            console.log('✅ Promo loaded from cart:', promo);
+          }
+        })
+        .catch(err => console.error('Failed to load promo:', err));
+    }
+  }, []);
 
   // Fetch crypto coins and UPI settings on mount
   useEffect(() => {
@@ -242,8 +288,9 @@ export default function CheckoutPage() {
           image: item.image,
         })),
         subtotal,
-        discount: 0,
-        total: subtotal,
+        discount,
+        total,
+        promo_code: appliedPromo?.code || null,
         status: 'order-placed' as const,
         paymentMethod: paymentMethodLabel,
         paymentNationality: formData.paymentNationality,
@@ -261,12 +308,12 @@ export default function CheckoutPage() {
       const order = await response.json();
       setCreatedOrderId(order.id);
       setOrderCreated(true);
-      setOrderTotal(subtotal);
+      setOrderTotal(total);
       
       // Handle different payment methods
       if (formData.paymentNationality === 'indian') {
         // Indian UPI payment
-        await generateQRCode(subtotal);
+        await generateQRCode(total);
         setShowQR(true);
         setTimeRemaining(120);
         clearCart();
@@ -529,7 +576,7 @@ export default function CheckoutPage() {
                             </div>
                             <div className="bg-blue-600/10 border border-blue-600/30 rounded-lg p-3">
                               <p className="text-xs text-blue-400 font-medium">
-                                📝 Buy Gift Card Similar to your total Amount ({formatPrice(subtotal)})
+                                📝 Buy Gift Card Similar to your total Amount ({formatPrice(total)})
                               </p>
                             </div>
                           </div>
@@ -826,7 +873,7 @@ export default function CheckoutPage() {
                   className="w-full rounded-lg bg-purple-600 px-6 py-4 text-lg font-semibold text-white shadow-lg shadow-purple-500/20 transition hover:bg-purple-500 border border-purple-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   <Lock className="h-5 w-5" />
-                  {loading ? 'Processing...' : `Place Order - ${formatPrice(subtotal)}`}
+                  {loading ? 'Processing...' : `Place Order - ${formatPrice(total)}`}
                 </button>
                 {formData.paymentNationality === 'international' && !formData.internationalMethod && (
                   <p className="mt-2 text-sm text-yellow-400 text-center">
@@ -1007,9 +1054,19 @@ export default function CheckoutPage() {
                 <span className="text-zinc-400">Subtotal</span>
                 <span className="text-white font-semibold">{formatPrice(subtotal)}</span>
               </div>
-              <div className="flex justify-between text-lg font-bold">
+              {discount > 0 && (
+                <>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-green-400">
+                      Discount {appliedPromo?.code && `(${appliedPromo.code})`}
+                    </span>
+                    <span className="text-green-400 font-semibold">-{formatPrice(discount)}</span>
+                  </div>
+                </>
+              )}
+              <div className="flex justify-between text-lg font-bold border-t border-zinc-800 pt-2">
                 <span className="text-white">Total</span>
-                <span className="text-purple-400">{formatPrice(subtotal)}</span>
+                <span className="text-purple-400">{formatPrice(total)}</span>
               </div>
             </div>
 
