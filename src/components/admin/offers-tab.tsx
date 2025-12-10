@@ -6,6 +6,7 @@ import type { Product } from '@/types';
 import { createOfferAction, updateOfferAction, deleteOfferAction } from '@/app/admin/offer-actions';
 import { setProductDiscountAction, createPromoCodeAction, updatePromoCodeAction, deletePromoCodeAction } from '@/app/admin/promo-actions';
 import { Edit2, Trash2, Plus, Image as ImageIcon, Tag, Percent } from 'lucide-react';
+import { ImageUpload } from '@/components/image-upload';
 
 export function OffersTab({ offers, onRefresh }: { offers: Offer[]; onRefresh?: () => Promise<void> }) {
   const [activeSection, setActiveSection] = useState<'banners' | 'discounts' | 'promo'>('banners');
@@ -15,6 +16,8 @@ export function OffersTab({ offers, onRefresh }: { offers: Offer[]; onRefresh?: 
   const [products, setProducts] = useState<Product[]>([]);
   const [promoCodes, setPromoCodes] = useState<any[]>([]);
   const [selectedPromoType, setSelectedPromoType] = useState<string>('percentage');
+  const [bannerImageUrl, setBannerImageUrl] = useState<string>('');
+  const [editBannerImageUrl, setEditBannerImageUrl] = useState<string>('');
 
   const refreshData = async () => {
     try {
@@ -103,6 +106,7 @@ export function OffersTab({ offers, onRefresh }: { offers: Offer[]; onRefresh?: 
           <form action={async (formData) => {
             await createOfferAction(formData);
             setShowAddForm(false);
+            setBannerImageUrl('');
             await onRefresh?.();
           }} className="space-y-4">
             <label className="flex flex-col gap-2 text-sm text-zinc-400">
@@ -125,17 +129,15 @@ export function OffersTab({ offers, onRefresh }: { offers: Offer[]; onRefresh?: 
               />
             </label>
 
-            <label className="flex flex-col gap-2 text-sm text-zinc-400">
-              Image URL *
-              <input
-                name="image"
-                type="url"
-                required
-                placeholder="https://example.com/banner-image.jpg"
-                className="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-white placeholder-zinc-600 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500/50"
-              />
-              <span className="text-xs text-zinc-600">Recommended size: 1200x400px</span>
-            </label>
+            <ImageUpload
+              value={bannerImageUrl}
+              onChange={setBannerImageUrl}
+              folder="banners"
+              label="Banner Image"
+              placeholder="https://example.com/banner-image.jpg"
+              required={true}
+              helpText="Recommended size: 1200x400px"
+            />
 
             <label className="flex flex-col gap-2 text-sm text-zinc-400">
               Link (Optional)
@@ -222,12 +224,16 @@ export function OffersTab({ offers, onRefresh }: { offers: Offer[]; onRefresh?: 
             <form action={async (formData) => {
               await updateOfferAction(formData);
               setEditingId(null);
+              setEditBannerImageUrl('');
               await onRefresh?.();
             }} className="space-y-4">
               <input type="hidden" name="id" value={editingId} />
               {(() => {
                 const offer = offers.find(o => o.id === editingId);
                 if (!offer) return null;
+                if (editBannerImageUrl === '' && offer.image) {
+                  setEditBannerImageUrl(offer.image);
+                }
                 return (
                   <>
                     <label className="flex flex-col gap-2 text-sm text-zinc-400">
@@ -248,16 +254,15 @@ export function OffersTab({ offers, onRefresh }: { offers: Offer[]; onRefresh?: 
                         className="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-white focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500/50"
                       />
                     </label>
-                    <label className="flex flex-col gap-2 text-sm text-zinc-400">
-                      Image URL *
-                      <input
-                        name="image"
-                        type="url"
-                        defaultValue={offer.image}
-                        required
-                        className="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-white focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500/50"
-                      />
-                    </label>
+                    <ImageUpload
+                      value={editBannerImageUrl}
+                      onChange={setEditBannerImageUrl}
+                      folder="banners"
+                      label="Banner Image"
+                      placeholder="https://example.com/banner-image.jpg"
+                      required={true}
+                      helpText="Recommended size: 1200x400px"
+                    />
                     <label className="flex flex-col gap-2 text-sm text-zinc-400">
                       Link (Optional)
                       <input

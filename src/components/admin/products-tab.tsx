@@ -5,11 +5,14 @@ import type { Product } from '@/types';
 import type { Category } from '@/lib/categories-db';
 import { createProduct, deleteProduct, updateProduct } from '@/app/admin/actions';
 import { Edit2, Trash2, Plus } from 'lucide-react';
+import { ImageUpload } from '@/components/image-upload';
 
 export function ProductsTab({ products, onRefresh, categories: initialCategories }: { products: Product[]; onRefresh?: () => Promise<void>; categories?: Category[] }) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>(initialCategories || []);
+  const [imageUrl, setImageUrl] = useState<string>('');
+  const [editImageUrl, setEditImageUrl] = useState<string>('');
 
   useEffect(() => {
     if (initialCategories) {
@@ -45,6 +48,7 @@ export function ProductsTab({ products, onRefresh, categories: initialCategories
           <form action={async (formData) => {
             await createProduct(formData);
             setShowAddForm(false);
+            setImageUrl('');
             await onRefresh?.();
           }} className="grid gap-4 md:grid-cols-2">
             <label className="flex flex-col gap-2 text-sm text-zinc-400">
@@ -86,15 +90,16 @@ export function ProductsTab({ products, onRefresh, categories: initialCategories
                 className="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-white placeholder-zinc-600 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500/50"
               />
             </label>
-            <label className="md:col-span-2 flex flex-col gap-2 text-sm text-zinc-400">
-              Image URL
-              <input
-                name="image"
-                type="url"
+            <div className="md:col-span-2">
+              <ImageUpload
+                value={imageUrl}
+                onChange={setImageUrl}
+                folder="products"
+                label="Product Image"
                 placeholder="https://example.com/image.jpg"
-                className="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-white placeholder-zinc-600 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500/50"
+                helpText="Recommended size: 800x800px"
               />
-            </label>
+            </div>
             <label className="flex flex-col gap-2 text-sm text-zinc-400">
               Rating (0-5)
               <input
@@ -236,12 +241,16 @@ export function ProductsTab({ products, onRefresh, categories: initialCategories
             <form action={async (formData) => {
               await updateProduct(formData);
               setEditingId(null);
+              setEditImageUrl('');
               await onRefresh?.();
             }} className="grid gap-4 md:grid-cols-2">
               <input type="hidden" name="id" value={editingId} />
               {(() => {
                 const product = products.find(p => p.id === editingId);
                 if (!product) return null;
+                if (editImageUrl === '' && product.image) {
+                  setEditImageUrl(product.image);
+                }
                 return (
                   <>
                     <label className="flex flex-col gap-2 text-sm text-zinc-400">
@@ -287,16 +296,16 @@ export function ProductsTab({ products, onRefresh, categories: initialCategories
                         className="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-white placeholder-zinc-600 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500/50"
                       />
                     </label>
-                    <label className="md:col-span-2 flex flex-col gap-2 text-sm text-zinc-400">
-                      Image URL
-                      <input
-                        name="image"
-                        type="url"
-                        defaultValue={product.image || ''}
+                    <div className="md:col-span-2">
+                      <ImageUpload
+                        value={editImageUrl}
+                        onChange={setEditImageUrl}
+                        folder="products"
+                        label="Product Image"
                         placeholder="https://example.com/image.jpg"
-                        className="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-white placeholder-zinc-600 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500/50"
+                        helpText="Recommended size: 800x800px"
                       />
-                    </label>
+                    </div>
                     <label className="flex flex-col gap-2 text-sm text-zinc-400">
                       Rating (0-5)
                       <input

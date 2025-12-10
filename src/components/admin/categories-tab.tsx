@@ -4,6 +4,7 @@ import { useState } from 'react';
 import type { Category } from '@/lib/categories-db';
 import { createCategoryAction, updateCategoryAction, deleteCategoryAction } from '@/app/admin/category-actions';
 import { Edit2, Trash2, Plus } from 'lucide-react';
+import { ImageUpload } from '@/components/image-upload';
 
 const AVAILABLE_ICONS = [
   'MessageSquare', 'FileCheck', 'Settings', 'Package', 'Briefcase', 
@@ -77,17 +78,19 @@ export function CategoriesTab({ categories, onRefresh }: { categories: Category[
               </div>
             </div>
 
-            <label className="flex flex-col gap-2 text-sm text-zinc-400">
-              Or Custom Icon URL
-              <input
-                name="icon"
-                type="url"
+            <div className="space-y-2">
+              <label className="block text-sm text-zinc-400">
+                Or Upload Custom Icon
+              </label>
+              <ImageUpload
                 value={customIcon}
-                onChange={(e) => setCustomIcon(e.target.value)}
+                onChange={setCustomIcon}
+                folder="categories"
+                label=""
                 placeholder="https://example.com/icon.svg"
-                className="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-white placeholder-zinc-600 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500/50"
+                helpText="Square PNG or SVG recommended (e.g., 64x64px)"
               />
-            </label>
+            </div>
 
             <div className="flex items-center gap-3">
               <button

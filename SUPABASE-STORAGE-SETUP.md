@@ -1,4 +1,4 @@
-# Supabase Storage Setup for Payment Screenshots
+# Supabase Storage Setup for Image Uploads
 
 ## Steps to Configure Storage:
 
@@ -7,13 +7,13 @@
 2. **Create a new bucket:**
    - Click "New Bucket"
    - Bucket name: `uploads`
-   - Set as **Public bucket** (so uploaded screenshots can be viewed)
+   - Set as **Public bucket** (so uploaded images can be viewed)
    - Click "Create bucket"
 
 3. **Configure bucket policies:**
    - Go to the `uploads` bucket
-   - Click on "Policies"
-   - Add the following policies:
+   - Click on "Policies" tab
+   - Click "New Policy" and add the following policies:
 
 ### Policy 1: Allow Public Read Access
 ```sql
@@ -45,18 +45,29 @@ USING (
 ## Folder Structure in Bucket:
 ```
 uploads/
+  ├── products/
+  │   ├── 1733943257902-abc123.jpg
+  │   └── 1733943258903-def456.png
+  ├── banners/
+  │   ├── 1733943259904-ghi789.jpg
+  │   └── 1733943260905-jkl012.png
+  ├── categories/
+  │   ├── 1733943261906-mno345.svg
+  │   └── 1733943262907-pqr678.png
   └── payment-screenshots/
       ├── ORD-123456-ABC123.jpg
-      ├── ORD-123456-DEF456.png
-      └── ...
+      └── ORD-123456-DEF456.png
 ```
 
 ## What This Enables:
-- ✅ Customers can upload payment screenshots after placing orders
+- ✅ **Product Images**: Upload product/service images directly from admin panel
+- ✅ **Banner Images**: Upload promotional banner images for offers carousel
+- ✅ **Category Icons**: Upload custom category icon images
+- ✅ **Payment Screenshots**: Customers can upload payment proof after ordering
 - ✅ Files are stored in Supabase Storage (works on Vercel)
-- ✅ Public URLs are generated for viewing screenshots
-- ✅ Admin panel can display uploaded screenshots
-- ✅ Files are organized by order ID
+- ✅ Public URLs are generated automatically for all uploads
+- ✅ Admin panel supports both URL input and file upload
+- ✅ Files are organized by type in separate folders
 
 ## Alternative: Simpler Setup
 If you want to make it completely public for uploads (not recommended for production):
