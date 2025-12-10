@@ -154,11 +154,12 @@ export default function OrderDetailPage() {
           {/* Progress Tracker */}
           <div className="rounded-xl bg-zinc-950 border border-zinc-800 p-4 sm:p-6 no-print overflow-hidden">
             <div className="flex items-center justify-between overflow-x-auto pb-2 gap-1 sm:gap-0">
-              {(['pending-payment', 'order-placed', 'payment-done', 'payment-confirmed', 'order-successful', 'delivered'] as const).map((status, idx) => {
+              {(['order-placed', 'payment-done', 'payment-confirmed', 'order-successful', 'delivered'] as const).map((status, idx) => {
                 const statusOrder = ['pending-payment', 'order-placed', 'payment-done', 'payment-confirmed', 'order-successful', 'delivered'];
                 const currentIndex = statusOrder.indexOf(order.status);
                 const isActive = order.status === status;
-                const isPassed = currentIndex >= idx;
+                // Status is passed if current order status index is greater than or equal to this step
+                const isPassed = currentIndex >= 0 && currentIndex >= (idx + 1); // +1 because we removed pending-payment from display
                 const Icon = statusConfig[status].icon;
                 
                 return (
@@ -173,7 +174,7 @@ export default function OrderDetailPage() {
                         ))}
                       </p>
                     </div>
-                    {idx < 5 && (
+                    {idx < 4 && (
                       <div className={`h-0.5 w-6 sm:w-12 mx-1 sm:mx-2 flex-shrink-0 ${isPassed ? 'bg-purple-500' : 'bg-zinc-800'}`} />
                     )}
                   </div>
