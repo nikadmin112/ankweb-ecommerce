@@ -59,6 +59,24 @@ export async function createPromoCode(promo: Omit<PromoCode, 'id' | 'created_at'
   return data;
 }
 
+export async function updatePromoCode(id: string, updates: Partial<Omit<PromoCode, 'id' | 'created_at' | 'updated_at'>>): Promise<PromoCode | null> {
+  const supabase = getServiceClient();
+  if (!supabase) throw new Error('Supabase client not configured');
+
+  const { data, error} = await supabase
+    .from('promo_codes')
+    .update(updates as any)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Update promo code error:', error);
+    throw error;
+  }
+  return data;
+}
+
 export async function deletePromoCode(id: string): Promise<boolean> {
   const supabase = getServiceClient();
   if (!supabase) throw new Error('Supabase client not configured');

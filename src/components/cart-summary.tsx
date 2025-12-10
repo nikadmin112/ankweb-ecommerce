@@ -22,15 +22,17 @@ export function CartSummary() {
   let freeItems: any[] = [];
 
   if (appliedPromo) {
-    if (appliedPromo.type === 'percentage') {
-      discount = (subtotal * Number(appliedPromo.value)) / 100;
-    } else if (appliedPromo.type === 'bogo' && items.length > 0) {
+    if (appliedPromo.discount_type === 'percentage') {
+      discount = (subtotal * Number(appliedPromo.discount_value)) / 100;
+    } else if (appliedPromo.discount_type === 'fixed') {
+      discount = Number(appliedPromo.discount_value);
+    } else if (appliedPromo.discount_type === 'bogo' && items.length > 0) {
       // Add cheapest item as free
       const cheapest = [...items].sort((a, b) => a.price - b.price)[0];
       freeItems = [cheapest];
       discount = cheapest.price;
-    } else if (appliedPromo.type === 'free_service') {
-      const freeProduct = items.find(i => i.id === appliedPromo.value);
+    } else if (appliedPromo.discount_type === 'free_service') {
+      const freeProduct = items.find(i => i.id === appliedPromo.discount_value);
       if (freeProduct) {
         freeItems = [freeProduct];
         discount = freeProduct.price;

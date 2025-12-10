@@ -4,13 +4,14 @@ import { useState, useEffect } from 'react';
 import type { Offer } from '@/lib/offers-db';
 import type { Product } from '@/types';
 import { createOfferAction, updateOfferAction, deleteOfferAction } from '@/app/admin/offer-actions';
-import { setProductDiscountAction, createPromoCodeAction, deletePromoCodeAction } from '@/app/admin/promo-actions';
+import { setProductDiscountAction, createPromoCodeAction, updatePromoCodeAction, deletePromoCodeAction } from '@/app/admin/promo-actions';
 import { Edit2, Trash2, Plus, Image as ImageIcon, Tag, Percent } from 'lucide-react';
 
 export function OffersTab({ offers }: { offers: Offer[] }) {
   const [activeSection, setActiveSection] = useState<'banners' | 'discounts' | 'promo'>('banners');
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingPromoId, setEditingPromoId] = useState<string | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [promoCodes, setPromoCodes] = useState<any[]>([]);
   const [selectedPromoType, setSelectedPromoType] = useState<string>('percentage');
@@ -471,38 +472,134 @@ export function OffersTab({ offers }: { offers: Offer[] }) {
             {promoCodes.map((promo) => (
               <div key={promo.id} className="rounded-lg border border-zinc-800 bg-zinc-950 p-4 shadow-xl">
                 <div className="flex items-center justify-between">
-                  <div>
+                  <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <Tag className="h-5 w-5 text-purple-400" />
                       <span className="text-lg font-bold text-white">{promo.code}</span>
+                      <span className={`text-xs px-2 py-1 rounded ${promo.is_active ? 'bg-green-600/20 text-green-400 border border-green-500/50' : 'bg-red-600/20 text-red-400 border border-red-500/50'}`}>
+                        {promo.is_active ? 'Active' : 'Inactive'}
+                      </span>
                     </div>
-                    <p className="mt-1 text-sm text-zinc-400">{promo.description}</p>
                     <div className="mt-2 flex items-center gap-2 flex-wrap">
                       <span className="rounded bg-purple-600/20 border border-purple-500/50 px-2 py-1 text-xs font-medium text-purple-400">
-                        {promo.type === 'percentage' && `${promo.value}% OFF`}
-                        {promo.type === 'bogo' && 'BUY 1 GET 1 FREE'}
-                        {promo.type === 'free_service' && 'FREE SERVICE'}
+                        {promo.discount_type === 'percentage' && `${promo.discount_value}% OFF`}
+                        {promo.discount_type === 'fixed' && `₹${promo.discount_value} OFF`}
+                        {promo.discount_type === 'bogo' && 'BUY 1 GET 1 FREE'}
+                        {promo.discount_type === 'free_service' && 'FREE SERVICE'}
                       </span>
-                      {promo.minCartValue && promo.minCartValue > 0 && (
-                        <span className="rounded bg-zinc-800 border border-zinc-700 px-2 py-1 text-xs font-medium text-zinc-400">
-                          Min: ₹{promo.minCartValue}
-                        </span>
-                      )}
+                      <span className="rounded bg-zinc-800 border border-zinc-700 px-2 py-1 text-xs font-medium text-zinc-400">
+                        Type: {promo.discount_type}
+                      </span>
                     </div>
                   </div>
-                  <form action={async (formData) => {
-                    await deletePromoCodeAction(formData);
-                    await refreshData();
-                  }}>
-                    <input type="hidden" name="id" value={promo.id} />
-                    <button type="submit" className="rounded-lg border border-zinc-700 bg-zinc-800 p-2 text-red-400 transition hover:bg-red-500/10 hover:border-red-500/50">
-                      <Trash2 className="h-4 w-4" />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setEditingPromoId(promo.id)}
+                      className="rounded-lg border border-zinc-700 bg-zinc-800 p-2 text-zinc-400 transition hover:bg-zinc-700 hover:text-white hover:border-purple-500/50"
+                    >
+                      <Edit2 className="h-4 w-4" />
                     </button>
-                  </form>
+                    <form action={async (formData) => {
+                      await deletePromoCodeAction(formData);
+                      await refreshData();
+                    }}>
+                      <input type="hidden" name="id" value={promo.id} />
+                      <button type="submit" className="rounded-lg border border-zinc-700 bg-zinc-800 p-2 text-red-400 transition hover:bg-red-500/10 hover:border-red-500/50">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </form>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
+
+          {/* Edit Promo Code Modal */}
+          {editingPromoId && (() => {
+            const promo = promoCodes.find(p => p.id === editingPromoId);
+            if (!promo) return null;
+            return (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                <div className="w-full max-w-md rounded-lg border border-zinc-800 bg-zinc-950 p-6 shadow-2xl">
+                  <h3 className="mb-4 text-lg font-semibold text-white">Edit Promo Code</h3>
+                  <form action={async (formData) => {
+                    try {
+                      await updatePromoCodeAction(formData);
+                      setEditingPromoId(null);
+                      await refreshData();
+                    } catch (error: any) {
+                      alert(error.message || 'Failed to update promo code');
+                    }
+                  }} className="space-y-4">
+                    <input type="hidden" name="id" value={promo.id} />
+                    
+                    <label className="flex flex-col gap-2 text-sm text-zinc-400">
+                      Promo Code *
+                      <input
+                        name="code"
+                        required
+                        defaultValue={promo.code}
+                        className="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-white uppercase focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500/50"
+                      />
+                    </label>
+
+                    <label className="flex flex-col gap-2 text-sm text-zinc-400">
+                      Discount Type *
+                      <select
+                        name="type"
+                        required
+                        defaultValue={promo.discount_type}
+                        className="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-white focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500/50"
+                      >
+                        <option value="percentage">Percentage Discount</option>
+                        <option value="fixed">Fixed Amount</option>
+                      </select>
+                    </label>
+
+                    <label className="flex flex-col gap-2 text-sm text-zinc-400">
+                      Discount Value *
+                      <input
+                        name="value"
+                        type="number"
+                        min="1"
+                        step="0.01"
+                        required
+                        defaultValue={promo.discount_value}
+                        className="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-white focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500/50"
+                      />
+                    </label>
+
+                    <label className="flex items-center gap-2 text-sm text-zinc-400">
+                      <input
+                        type="checkbox"
+                        name="is_active"
+                        value="true"
+                        defaultChecked={promo.is_active}
+                        className="rounded border-zinc-700 bg-zinc-900 text-purple-600 focus:ring-purple-500"
+                      />
+                      Active
+                    </label>
+
+                    <div className="flex gap-3">
+                      <button
+                        type="submit"
+                        className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-purple-500/20 hover:bg-purple-500 border border-purple-500"
+                      >
+                        Save Changes
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setEditingPromoId(null)}
+                        className="rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-2 text-sm font-semibold text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            );
+          })()}
         </div>
       )}
     </div>

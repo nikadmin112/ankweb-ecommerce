@@ -899,7 +899,7 @@ export default function CheckoutPage() {
                     <p className="text-sm text-blue-400">
                       Amount to Pay: <span className="text-3xl font-bold text-white">₹{orderTotal.toFixed(0)}</span>
                     </p>
-                    <p className="text-xs text-zinc-500 mt-2">UPI ID: webpay111@slc</p>
+                    <p className="text-xs text-zinc-500 mt-2">UPI ID: {upiSettings?.upiId || 'webpay111@slc'}</p>
                   </div>
 
                   {/* Payment Confirmation */}
