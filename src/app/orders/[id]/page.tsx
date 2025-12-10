@@ -188,7 +188,7 @@ export default function OrderDetailPage() {
                 return (
                   <div key={status} className="flex items-center flex-shrink-0">
                     <div className="flex flex-col items-center min-w-[70px] sm:min-w-[90px]">
-                      <div className={`rounded-full p-2 sm:p-3 ${isPassed ? statusConfig[status].bg + ' ' + statusConfig[status].border : 'bg-zinc-900 border-zinc-800'} border`}>
+                      <div className={`rounded-full p-2 sm:p-3 border ${isPassed ? `${statusConfig[status].bg} ${statusConfig[status].border}` : 'bg-zinc-900 border-zinc-800'}`}>
                         <Icon className={`h-4 w-4 sm:h-5 sm:w-5 ${isPassed ? statusConfig[status].color : 'text-zinc-600'}`} />
                       </div>
                       <p className={`mt-1 sm:mt-2 text-[10px] sm:text-xs font-medium text-center ${isPassed ? 'text-white' : 'text-zinc-600'}`}>
