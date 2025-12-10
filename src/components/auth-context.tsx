@@ -117,7 +117,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(guestUser);
     };
 
-    const logout = () => setUser(null);
+    const logout = () => {
+      setUser(null);
+      // Clear any stored session data
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('user');
+        sessionStorage.clear();
+        // Redirect to login page
+        window.location.href = '/auth/login';
+      }
+    };
 
     return { user, login, signup, guestCheckout, logout };
   }, [user]);

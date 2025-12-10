@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Trash2, Tag } from 'lucide-react';
 import { useCart } from './cart-context';
 import { useCurrency } from './currency-context';
@@ -17,6 +17,8 @@ export function CartSummary() {
     const itemPrice = item.discount ? item.price * (1 - item.discount / 100) : item.price;
     return sum + itemPrice * item.quantity;
   }, 0);
+
+  console.log('🔄 CartSummary render - appliedPromo:', appliedPromo, 'subtotal:', subtotal);
 
   let discount = 0;
   let freeItems: any[] = [];

@@ -56,13 +56,29 @@ export function Header() {
           <CurrencySelector />
           <ThemeToggle />
           {user ? (
-            <button
-              onClick={logout}
-              className="flex items-center gap-2 text-sm font-medium text-zinc-300 transition hover:text-white"
-              title={`${user.firstName} ${user.lastName}`}
-            >
-              <User className="h-5 w-5" />
-            </button>
+            <div className="relative group">
+              <button
+                className="flex items-center gap-2 text-sm font-medium text-zinc-300 transition hover:text-white"
+                title={`${user.firstName} ${user.lastName}`}
+              >
+                <User className="h-5 w-5" />
+              </button>
+              <div className="absolute right-0 top-full mt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div className="rounded-lg border border-zinc-800 bg-zinc-950 shadow-xl py-2">
+                  <div className="px-4 py-2 border-b border-zinc-800">
+                    <p className="text-sm font-medium text-white">{user.firstName} {user.lastName}</p>
+                    <p className="text-xs text-zinc-500">{user.email}</p>
+                  </div>
+                  <button
+                    onClick={logout}
+                    className="w-full px-4 py-2 text-left text-sm text-zinc-300 hover:bg-zinc-900 hover:text-white transition flex items-center gap-2"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Log Out
+                  </button>
+                </div>
+              </div>
+            </div>
           ) : (
             <Link href="/auth/login" className="text-sm font-medium text-zinc-300 transition hover:text-white">
               <User className="h-5 w-5" />
