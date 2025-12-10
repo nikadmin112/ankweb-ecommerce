@@ -66,15 +66,17 @@ export function ProductDetailClient({
       <div className="mt-8 grid gap-10 lg:grid-cols-2">
         {/* Product image */}
         <div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 shadow-2xl">
-          {product.image ? (
-            <Image
-              src={product.image}
-              alt={product.name}
-              width={1200}
-              height={800}
-              className="h-full w-full object-cover"
-              priority
-            />
+          {product.image && product.image.trim() !== '' ? (
+            <div className="relative w-full h-96">
+              <Image
+                src={product.image}
+                alt={product.name}
+                fill
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="object-cover"
+                priority
+              />
+            </div>
           ) : (
             <div className="flex h-96 items-center justify-center bg-zinc-900">
               <p className="text-zinc-600">No image available</p>
