@@ -27,7 +27,7 @@ function toDbProduct(product: Partial<LocalProduct>): Partial<DbProduct> {
   return {
     ...product,
     full_description: product.fullDescription,
-    review_count: product.reviewCount,
+    review_count: product.reviewCount ?? undefined,
   };
 }
 
