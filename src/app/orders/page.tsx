@@ -8,6 +8,7 @@ import { Package, Clock, CheckCircle, XCircle, ChevronRight } from 'lucide-react
 import type { Order } from '@/lib/orders-db';
 
 const statusConfig = {
+  'pending-payment': { icon: Clock, color: 'text-orange-400', bg: 'bg-orange-600/10', border: 'border-orange-600/30' },
   'order-placed': { icon: Package, color: 'text-blue-400', bg: 'bg-blue-600/10', border: 'border-blue-600/30' },
   'payment-done': { icon: Clock, color: 'text-yellow-400', bg: 'bg-yellow-600/10', border: 'border-yellow-600/30' },
   'payment-confirmed': { icon: CheckCircle, color: 'text-purple-400', bg: 'bg-purple-600/10', border: 'border-purple-600/30' },

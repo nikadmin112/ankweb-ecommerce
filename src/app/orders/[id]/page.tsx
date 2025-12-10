@@ -9,6 +9,7 @@ import type { Order } from '@/lib/orders-db';
 import toast from 'react-hot-toast';
 
 const statusConfig = {
+  'pending-payment': { icon: Clock, color: 'text-orange-400', bg: 'bg-orange-600/10', border: 'border-orange-600/30', label: 'Pending Payment' },
   'order-placed': { icon: Package, color: 'text-blue-400', bg: 'bg-blue-600/10', border: 'border-blue-600/30', label: 'Order Placed' },
   'payment-done': { icon: Clock, color: 'text-yellow-400', bg: 'bg-yellow-600/10', border: 'border-yellow-600/30', label: 'Payment Done' },
   'payment-confirmed': { icon: CheckCircle, color: 'text-purple-400', bg: 'bg-purple-600/10', border: 'border-purple-600/30', label: 'Payment Confirmed' },
@@ -153,8 +154,8 @@ export default function OrderDetailPage() {
           {/* Progress Tracker */}
           <div className="rounded-xl bg-zinc-950 border border-zinc-800 p-4 sm:p-6 no-print overflow-hidden">
             <div className="flex items-center justify-between overflow-x-auto pb-2 gap-1 sm:gap-0">
-              {(['order-placed', 'payment-done', 'payment-confirmed', 'order-successful', 'delivered'] as const).map((status, idx) => {
-                const statusOrder = ['order-placed', 'payment-done', 'payment-confirmed', 'order-successful', 'delivered'];
+              {(['pending-payment', 'order-placed', 'payment-done', 'payment-confirmed', 'order-successful', 'delivered'] as const).map((status, idx) => {
+                const statusOrder = ['pending-payment', 'order-placed', 'payment-done', 'payment-confirmed', 'order-successful', 'delivered'];
                 const currentIndex = statusOrder.indexOf(order.status);
                 const isActive = order.status === status;
                 const isPassed = currentIndex >= idx;
@@ -172,7 +173,7 @@ export default function OrderDetailPage() {
                         ))}
                       </p>
                     </div>
-                    {idx < 4 && (
+                    {idx < 5 && (
                       <div className={`h-0.5 w-6 sm:w-12 mx-1 sm:mx-2 flex-shrink-0 ${isPassed ? 'bg-purple-500' : 'bg-zinc-800'}`} />
                     )}
                   </div>
