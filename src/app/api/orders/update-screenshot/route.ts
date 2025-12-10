@@ -3,7 +3,7 @@ import { getServiceClient } from '@/lib/supabase';
 
 export async function POST(request: Request) {
   try {
-    const { orderId, screenshotUrl } = await request.json();
+    const { orderId, screenshotUrl, status } = await request.json();
 
     if (!orderId || !screenshotUrl) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
       .from('orders')
       .update({
         payment_screenshot: screenshotUrl,
-        status: 'payment-done',
+        status: status || 'payment-done',
       })
       .eq('id', orderId)
       .select()

@@ -205,13 +205,14 @@ export default function CheckoutPage() {
       const results = await Promise.all(uploadPromises);
       const urls = results.map(r => r.url);
 
-      // Update order with screenshots
+      // Update order with screenshots and change status to order-placed
       const updateResponse = await fetch('/api/orders/update-screenshot', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           orderId: createdOrderId,
           screenshotUrl: urls.join(','), // Store as comma-separated URLs
+          status: 'order-placed', // Update status after payment proof uploaded
         }),
       });
 
@@ -307,7 +308,7 @@ export default function CheckoutPage() {
         discount,
         total,
         promo_code: appliedPromo?.code || null,
-        status: 'order-placed' as const,
+        status: 'pending-payment' as const,
         paymentMethod: paymentMethodLabel,
         paymentNationality: formData.paymentNationality,
         notes: formData.notes,
@@ -398,13 +399,14 @@ export default function CheckoutPage() {
 
       const { url } = await uploadResponse.json();
 
-      // Update order with screenshot
+      // Update order with screenshot and change status to order-placed
       const updateResponse = await fetch('/api/orders/update-screenshot', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           orderId: createdOrderId,
           screenshotUrl: url,
+          status: 'order-placed',
         }),
       });
 
@@ -907,20 +909,11 @@ export default function CheckoutPage() {
 
           {/* QR Code Modal Popup */}
           {orderCreated && showQR && qrCodeUrl && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4">
               <div className="relative w-full max-w-md rounded-2xl bg-zinc-950 border border-zinc-800 p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-                <button
-                  onClick={() => {
-                    setShowQR(false);
-                    setQrCodeUrl('');
-                    router.push(`/orders/${createdOrderId}`);
-                  }}
-                  className="absolute right-4 top-4 rounded-full bg-zinc-900 p-2 text-zinc-400 hover:text-white transition"
-                >
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
+                <div className="mb-4 rounded-lg bg-orange-500/10 border border-orange-500/30 p-3">
+                  <p className="text-sm text-orange-400 font-medium">⚠️ Screenshot upload is mandatory to complete your order</p>
+                </div>
 
                 <div className="text-center">
                   <h3 className="text-2xl font-semibold text-white mb-2">Scan QR Code to Pay</h3>
@@ -1201,17 +1194,11 @@ export default function CheckoutPage() {
 
       {/* Screenshot Upload Modal */}
       {showScreenshotModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4">
           <div className="relative w-full max-w-lg rounded-2xl bg-zinc-950 border border-zinc-800 p-6 shadow-2xl">
-            <button
-              onClick={() => !uploadingScreenshot && setShowScreenshotModal(false)}
-              disabled={uploadingScreenshot}
-              className="absolute right-4 top-4 rounded-full bg-zinc-900 p-2 text-zinc-400 hover:text-white transition disabled:opacity-50"
-            >
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+            <div className="mb-4 rounded-lg bg-orange-500/10 border border-orange-500/30 p-3">
+              <p className="text-sm text-orange-400 font-medium">⚠️ Screenshot upload is mandatory to complete your order</p>
+            </div>
 
             <h3 className="text-2xl font-semibold text-white mb-2">Upload Payment Proof</h3>
             <p className="text-sm text-zinc-400 mb-6">Attach screenshot(s) of your payment confirmation</p>
