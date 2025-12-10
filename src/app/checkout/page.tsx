@@ -32,6 +32,7 @@ export default function CheckoutPage() {
   const [cryptoCoins, setCryptoCoins] = useState<any[]>([]);
   const [selectedCoin, setSelectedCoin] = useState<any>(null);
   const [selectedNetwork, setSelectedNetwork] = useState<any>(null);
+  const [upiSettings, setUpiSettings] = useState<any>(null);
   
   const [formData, setFormData] = useState({
     fullName: user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : '',
@@ -47,9 +48,10 @@ export default function CheckoutPage() {
     return sum + itemPrice * item.quantity;
   }, 0);
 
-  // Fetch crypto coins on mount
+  // Fetch crypto coins and UPI settings on mount
   useEffect(() => {
     fetchCryptoCoins();
+    fetchUpiSettings();
   }, []);
 
   // Fetch payment settings when international method changes
@@ -68,6 +70,18 @@ export default function CheckoutPage() {
       }
     } catch (error) {
       console.error('Failed to fetch crypto coins:', error);
+    }
+  };
+
+  const fetchUpiSettings = async () => {
+    try {
+      const response = await fetch('/api/payment-settings/upi');
+      if (response.ok) {
+        const data = await response.json();
+        setUpiSettings(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch UPI settings:', error);
     }
   };
 
@@ -176,7 +190,8 @@ export default function CheckoutPage() {
 
   const generateQRCode = async (amount: number) => {
     try {
-      const upiString = `upi://pay?pa=webpay111@slc&pn=NIKHIL&am=${amount}&cu=INR`;
+      const upiId = upiSettings?.upiId || 'webpay111@slc'; // Fallback to default
+      const upiString = `upi://pay?pa=${upiId}&pn=Payment&am=${amount}&cu=INR`;
       const qrDataUrl = await QRCode.toDataURL(upiString, {
         width: 300,
         margin: 2,
