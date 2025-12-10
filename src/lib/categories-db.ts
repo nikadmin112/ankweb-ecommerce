@@ -39,9 +39,12 @@ export async function createCategory(category: Omit<Category, 'id' | 'created_at
   const supabase = getServiceClient();
   if (!supabase) throw new Error('Supabase not configured');
 
+  // Generate a unique ID
+  const id = `cat_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
   const { data, error } = await supabase
     .from('categories')
-    .insert([category] as any)
+    .insert([{ ...category, id }] as any)
     .select()
     .single();
 
@@ -73,5 +76,9 @@ export async function deleteCategory(id: string): Promise<boolean> {
     .delete()
     .eq('id', id);
 
-  return !error;
+  if (error) {
+    console.error('Delete category error:', error);
+    throw error;
+  }
+  return true;
 }

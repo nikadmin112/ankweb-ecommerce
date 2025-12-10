@@ -42,13 +42,20 @@ export async function updateCategoryAction(formData: FormData) {
 }
 
 export async function deleteCategoryAction(formData: FormData) {
-  const id = formData.get('id') as string;
+  try {
+    const id = formData.get('id') as string;
 
-  if (!id) {
-    throw new Error('ID is required');
+    if (!id) {
+      throw new Error('ID is required');
+    }
+
+    console.log('Deleting category with id:', id);
+    const result = await deleteCategory(id);
+    console.log('Category deleted successfully:', result);
+    revalidatePath('/admin');
+    revalidatePath('/shop');
+  } catch (error) {
+    console.error('Error in deleteCategoryAction:', error);
+    throw error;
   }
-
-  await deleteCategory(id);
-  revalidatePath('/admin');
-  revalidatePath('/shop');
 }
