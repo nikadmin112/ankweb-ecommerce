@@ -27,15 +27,20 @@ export async function setProductDiscountAction(formData: FormData) {
 export async function createPromoCodeAction(formData: FormData) {
   try {
     const code = (formData.get('code') as string).toUpperCase();
-    const discount_type = formData.get('type') as 'percentage' | 'fixed';
-    const discount_value = Number(formData.get('value')) || 0;
+    const discount_type = formData.get('type') as string;
+    const valueStr = formData.get('value') as string;
     const is_active = true;
 
-    if (!code || !discount_type || !discount_value) {
+    if (!code || !discount_type || !valueStr) {
       throw new Error('Code, type, and value are required');
     }
 
-    await createPromoCode({ code, discount_type, discount_value, is_active });
+    // For percentage and fixed, convert to number. For free_service, keep as string (product ID)
+    const discount_value = (discount_type === 'percentage' || discount_type === 'fixed') 
+      ? Number(valueStr) 
+      : Number(valueStr) || valueStr; // If number conversion fails, keep as string
+
+    await createPromoCode({ code, discount_type, discount_value: discount_value as any, is_active });
     revalidatePath('/admin');
   } catch (error: any) {
     console.error('Error creating promo code:', error);
@@ -50,15 +55,20 @@ export async function updatePromoCodeAction(formData: FormData) {
   try {
     const id = formData.get('id') as string;
     const code = (formData.get('code') as string).toUpperCase();
-    const discount_type = formData.get('type') as 'percentage' | 'fixed';
-    const discount_value = Number(formData.get('value')) || 0;
+    const discount_type = formData.get('type') as string;
+    const valueStr = formData.get('value') as string;
     const is_active = formData.get('is_active') === 'true';
 
-    if (!id || !code || !discount_type || !discount_value) {
+    if (!id || !code || !discount_type || !valueStr) {
       throw new Error('ID, code, type, and value are required');
     }
 
-    await updatePromoCode(id, { code, discount_type, discount_value, is_active });
+    // For percentage and fixed, convert to number. For free_service, keep as string (product ID)
+    const discount_value = (discount_type === 'percentage' || discount_type === 'fixed') 
+      ? Number(valueStr) 
+      : Number(valueStr) || valueStr; // If number conversion fails, keep as string
+
+    await updatePromoCode(id, { code, discount_type, discount_value: discount_value as any, is_active });
     revalidatePath('/admin');
   } catch (error: any) {
     console.error('Error updating promo code:', error);

@@ -26,16 +26,28 @@ export function CartSummary() {
       discount = (subtotal * Number(appliedPromo.discount_value)) / 100;
     } else if (appliedPromo.discount_type === 'fixed') {
       discount = Number(appliedPromo.discount_value);
-    } else if (appliedPromo.discount_type === 'bogo' && items.length > 0) {
-      // Add cheapest item as free
-      const cheapest = [...items].sort((a, b) => a.price - b.price)[0];
-      freeItems = [cheapest];
-      discount = cheapest.price;
+    } else if (appliedPromo.discount_type === 'bogo' && items.length >= 2) {
+      // Sort by price descending to find most expensive item
+      const sortedItems = [...items].sort((a, b) => {
+        const priceA = a.discount ? a.price * (1 - a.discount / 100) : a.price;
+        const priceB = b.discount ? b.price * (1 - b.discount / 100) : b.price;
+        return priceA - priceB; // Ascending order
+      });
+      // Make the cheapest item free
+      const cheapestItem = sortedItems[0];
+      const cheapestPrice = cheapestItem.discount 
+        ? cheapestItem.price * (1 - cheapestItem.discount / 100) 
+        : cheapestItem.price;
+      freeItems = [cheapestItem];
+      discount = cheapestPrice;
     } else if (appliedPromo.discount_type === 'free_service') {
-      const freeProduct = items.find(i => i.id === appliedPromo.discount_value);
+      const freeProduct = items.find(i => i.id === String(appliedPromo.discount_value));
       if (freeProduct) {
+        const freePrice = freeProduct.discount 
+          ? freeProduct.price * (1 - freeProduct.discount / 100) 
+          : freeProduct.price;
         freeItems = [freeProduct];
-        discount = freeProduct.price;
+        discount = freePrice;
       }
     }
   }
