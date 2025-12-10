@@ -169,7 +169,16 @@ export function ProductGrid({ products }: { products: Product[] }) {
                   )}
                 </div>
 
-                {/* Quick Add Button - Hidden on mobile, shown on hover for desktop */}
+                {/* Mobile Cart Button - Bottom Right Corner */}
+                <button
+                  onClick={(e) => handleAddToCart(e, product)}
+                  className="absolute bottom-2 right-2 z-10 sm:hidden rounded-full bg-purple-600 p-2 shadow-lg transition-all hover:bg-purple-500 hover:scale-110 active:scale-95 border border-purple-500/50"
+                  title="Add to cart"
+                >
+                  <ShoppingCart className="h-4 w-4 text-white" />
+                </button>
+
+                {/* Desktop Quick Add Button - Shown on hover for desktop */}
                 <div className="hidden sm:block border-t border-zinc-800 p-2 opacity-0 transition-opacity group-hover:opacity-100">
                   <button
                     onClick={(e) => handleAddToCart(e, product)}
