@@ -44,21 +44,34 @@ export function CartSummary() {
     } else if (appliedPromo.discount_type === 'fixed') {
       discount = Number(appliedPromo.discount_value);
       console.log(`✅ Fixed discount: ₹${discount}`);
-    } else if (appliedPromo.discount_type === 'bogo' && items.length >= 2) {
-      const sortedItems = [...items].sort((a, b) => {
-        const priceA = a.discount ? a.price * (1 - a.discount / 100) : a.price;
-        const priceB = b.discount ? b.price * (1 - b.discount / 100) : b.price;
-        return priceA - priceB;
-      });
-      const cheapestItem = sortedItems[0];
-      const cheapestPrice = cheapestItem.discount 
-        ? cheapestItem.price * (1 - cheapestItem.discount / 100) 
-        : cheapestItem.price;
-      freeItems = [cheapestItem];
-      discount = cheapestPrice;
-      console.log(`✅ BOGO discount: ${cheapestItem.name} free = ₹${cheapestPrice}`);
-    } else if (appliedPromo.discount_type === 'bogo' && items.length < 2) {
-      console.log('⚠️ BOGO requires 2+ items in cart');
+    } else if (appliedPromo.discount_type === 'bogo') {
+      // Check if any single item has quantity >= 2
+      const itemWithMultipleQty = items.find(item => item.quantity >= 2);
+      
+      if (itemWithMultipleQty) {
+        // Apply 50% discount on the item with multiple quantity
+        const itemPrice = itemWithMultipleQty.discount 
+          ? itemWithMultipleQty.price * (1 - itemWithMultipleQty.discount / 100) 
+          : itemWithMultipleQty.price;
+        // Discount is 50% of (price * quantity)
+        discount = (itemPrice * itemWithMultipleQty.quantity) * 0.5;
+        console.log(`✅ BOGO (same product x${itemWithMultipleQty.quantity}): 50% off = ₹${discount}`);
+      } else if (items.length >= 2) {
+        const sortedItems = [...items].sort((a, b) => {
+          const priceA = a.discount ? a.price * (1 - a.discount / 100) : a.price;
+          const priceB = b.discount ? b.price * (1 - b.discount / 100) : b.price;
+          return priceA - priceB;
+        });
+        const cheapestItem = sortedItems[0];
+        const cheapestPrice = cheapestItem.discount 
+          ? cheapestItem.price * (1 - cheapestItem.discount / 100) 
+          : cheapestItem.price;
+        freeItems = [cheapestItem];
+        discount = cheapestPrice;
+        console.log(`✅ BOGO (different products): ${cheapestItem.name} free = ₹${cheapestPrice}`);
+      } else {
+        console.log('⚠️ BOGO requires 2+ items or 1 item with qty >= 2');
+      }
     } else if (appliedPromo.discount_type === 'free_service' && appliedPromo.free_product_id) {
       const freeProduct = items.find(i => i.id === appliedPromo.free_product_id);
       console.log(`🔍 Looking for product ${appliedPromo.free_product_id}, found:`, freeProduct);

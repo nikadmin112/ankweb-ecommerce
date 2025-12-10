@@ -56,15 +56,28 @@ export default function CheckoutPage() {
       discount = (subtotal * Number(appliedPromo.discount_value)) / 100;
     } else if (appliedPromo.discount_type === 'fixed') {
       discount = Number(appliedPromo.discount_value);
-    } else if (appliedPromo.discount_type === 'bogo' && items.length >= 2) {
-      const sortedByPrice = [...items].sort((a, b) => {
-        const priceA = a.discount ? a.price * (1 - a.discount / 100) : a.price;
-        const priceB = b.discount ? b.price * (1 - b.discount / 100) : b.price;
-        return priceA - priceB;
-      });
-      const cheapestItem = sortedByPrice[0];
-      const cheapestPrice = cheapestItem.discount ? cheapestItem.price * (1 - cheapestItem.discount / 100) : cheapestItem.price;
-      discount = cheapestPrice;
+    } else if (appliedPromo.discount_type === 'bogo') {
+      // Check if any single item has quantity >= 2
+      const itemWithMultipleQty = items.find(item => item.quantity >= 2);
+      
+      if (itemWithMultipleQty) {
+        // Apply 50% discount on the item with multiple quantity
+        const itemPrice = itemWithMultipleQty.discount 
+          ? itemWithMultipleQty.price * (1 - itemWithMultipleQty.discount / 100) 
+          : itemWithMultipleQty.price;
+        // Discount is 50% of (price * quantity)
+        discount = (itemPrice * itemWithMultipleQty.quantity) * 0.5;
+      } else if (items.length >= 2) {
+        // BOGO: Sort by price ASC, make the cheapest one free
+        const sortedByPrice = [...items].sort((a, b) => {
+          const priceA = a.discount ? a.price * (1 - a.discount / 100) : a.price;
+          const priceB = b.discount ? b.price * (1 - b.discount / 100) : b.price;
+          return priceA - priceB;
+        });
+        const cheapestItem = sortedByPrice[0];
+        const cheapestPrice = cheapestItem.discount ? cheapestItem.price * (1 - cheapestItem.discount / 100) : cheapestItem.price;
+        discount = cheapestPrice;
+      }
     } else if (appliedPromo.discount_type === 'free_service' && appliedPromo.free_product_id) {
       const freeProduct = items.find(i => i.id === appliedPromo.free_product_id);
       if (freeProduct) {

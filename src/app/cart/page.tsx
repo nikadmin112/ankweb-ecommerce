@@ -33,18 +33,31 @@ export default function CartPage() {
     } else if (appliedPromo.discount_type === 'fixed') {
       discount = Number(appliedPromo.discount_value);
       console.log(`✅ Fixed: ${discount}`);
-    } else if (appliedPromo.discount_type === 'bogo' && items.length >= 2) {
-      // BOGO: Sort by price ASC, make the cheapest one free
-      const sortedByPrice = [...items].sort((a, b) => {
-        const priceA = a.discount ? a.price * (1 - a.discount / 100) : a.price;
-        const priceB = b.discount ? b.price * (1 - b.discount / 100) : b.price;
-        return priceA - priceB;
-      });
-      const cheapestItem = sortedByPrice[0];
-      freeItems = [cheapestItem];
-      const cheapestPrice = cheapestItem.discount ? cheapestItem.price * (1 - cheapestItem.discount / 100) : cheapestItem.price;
-      discount = cheapestPrice;
-      console.log(`✅ BOGO: ${cheapestItem.name} free = ${discount}`);
+    } else if (appliedPromo.discount_type === 'bogo') {
+      // Check if any single item has quantity >= 2
+      const itemWithMultipleQty = items.find(item => item.quantity >= 2);
+      
+      if (itemWithMultipleQty) {
+        // Apply 50% discount on the item with multiple quantity
+        const itemPrice = itemWithMultipleQty.discount 
+          ? itemWithMultipleQty.price * (1 - itemWithMultipleQty.discount / 100) 
+          : itemWithMultipleQty.price;
+        // Discount is 50% of (price * quantity)
+        discount = (itemPrice * itemWithMultipleQty.quantity) * 0.5;
+        console.log(`✅ BOGO (same product x${itemWithMultipleQty.quantity}): 50% off = ${discount}`);
+      } else if (items.length >= 2) {
+        // BOGO: Sort by price ASC, make the cheapest one free
+        const sortedByPrice = [...items].sort((a, b) => {
+          const priceA = a.discount ? a.price * (1 - a.discount / 100) : a.price;
+          const priceB = b.discount ? b.price * (1 - b.discount / 100) : b.price;
+          return priceA - priceB;
+        });
+        const cheapestItem = sortedByPrice[0];
+        freeItems = [cheapestItem];
+        const cheapestPrice = cheapestItem.discount ? cheapestItem.price * (1 - cheapestItem.discount / 100) : cheapestItem.price;
+        discount = cheapestPrice;
+        console.log(`✅ BOGO (different products): ${cheapestItem.name} free = ${discount}`);
+      }
     } else if (appliedPromo.discount_type === 'free_service' && appliedPromo.free_product_id) {
       // Find product in cart or fetch it
       const existingProduct = items.find(i => i.id === appliedPromo.free_product_id);
