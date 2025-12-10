@@ -26,6 +26,13 @@ export default function OrderDetailPage() {
 
   useEffect(() => {
     fetchOrder();
+    
+    // Poll for order updates every 5 seconds
+    const interval = setInterval(() => {
+      fetchOrder();
+    }, 5000);
+    
+    return () => clearInterval(interval);
   }, [params.id]);
 
   const fetchOrder = async () => {
@@ -92,27 +99,31 @@ export default function OrderDetailPage() {
         }
       `}</style>
 
-      <main className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:py-14">
+      <main className="mx-auto max-w-4xl px-4 py-6 sm:py-10 sm:px-6 lg:py-14">
         {/* Header */}
-        <div className="mb-8 flex items-center justify-between no-print">
-          <div>
-            <h1 className="text-3xl font-bold text-white">Order Details</h1>
-            <p className="text-zinc-400">Order #{order.orderNumber}</p>
-          </div>
-          <div className="flex gap-3">
-            <button
-              onClick={printInvoice}
-              className="flex items-center gap-2 rounded-lg bg-zinc-900 border border-zinc-800 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-800 transition"
-            >
-              <Printer className="h-4 w-4" />
-              Print Invoice
-            </button>
-            <Link
-              href="/orders"
-              className="rounded-lg bg-purple-600 border border-purple-500 px-4 py-2 text-sm font-semibold text-white hover:bg-purple-500 transition"
-            >
-              View All Orders
-            </Link>
+        <div className="mb-6 sm:mb-8 no-print">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-white">Order Details</h1>
+              <p className="text-sm sm:text-base text-zinc-400">Order #{order.orderNumber}</p>
+            </div>
+            <div className="flex gap-2 sm:gap-3">
+              <button
+                onClick={printInvoice}
+                className="flex items-center gap-2 rounded-lg bg-zinc-900 border border-zinc-800 px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-zinc-800 transition"
+              >
+                <Printer className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Print Invoice</span>
+                <span className="sm:hidden">Print</span>
+              </button>
+              <Link
+                href="/orders"
+                className="flex items-center rounded-lg bg-purple-600 border border-purple-500 px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-purple-500 transition"
+              >
+                <span className="hidden sm:inline">View All Orders</span>
+                <span className="sm:hidden">All Orders</span>
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -140,8 +151,8 @@ export default function OrderDetailPage() {
           </div>
 
           {/* Progress Tracker */}
-          <div className="rounded-xl bg-zinc-950 border border-zinc-800 p-6 no-print">
-            <div className="flex items-center justify-between overflow-x-auto">
+          <div className="rounded-xl bg-zinc-950 border border-zinc-800 p-4 sm:p-6 no-print overflow-hidden">
+            <div className="flex items-center justify-between overflow-x-auto pb-2 gap-1 sm:gap-0">
               {(['order-placed', 'payment-done', 'payment-confirmed', 'order-successful', 'delivered'] as const).map((status, idx) => {
                 const statusOrder = ['order-placed', 'payment-done', 'payment-confirmed', 'order-successful', 'delivered'];
                 const currentIndex = statusOrder.indexOf(order.status);
@@ -150,17 +161,19 @@ export default function OrderDetailPage() {
                 const Icon = statusConfig[status].icon;
                 
                 return (
-                  <div key={status} className="flex items-center">
-                    <div className="flex flex-col items-center">
-                      <div className={`rounded-full p-3 ${isPassed ? statusConfig[status].bg + ' ' + statusConfig[status].border : 'bg-zinc-900 border-zinc-800'} border`}>
-                        <Icon className={`h-5 w-5 ${isPassed ? statusConfig[status].color : 'text-zinc-600'}`} />
+                  <div key={status} className="flex items-center flex-shrink-0">
+                    <div className="flex flex-col items-center min-w-[70px] sm:min-w-[90px]">
+                      <div className={`rounded-full p-2 sm:p-3 ${isPassed ? statusConfig[status].bg + ' ' + statusConfig[status].border : 'bg-zinc-900 border-zinc-800'} border`}>
+                        <Icon className={`h-4 w-4 sm:h-5 sm:w-5 ${isPassed ? statusConfig[status].color : 'text-zinc-600'}`} />
                       </div>
-                      <p className={`mt-2 text-xs font-medium ${isPassed ? 'text-white' : 'text-zinc-600'}`}>
-                        {statusConfig[status].label}
+                      <p className={`mt-1 sm:mt-2 text-[10px] sm:text-xs font-medium text-center ${isPassed ? 'text-white' : 'text-zinc-600'}`}>
+                        {statusConfig[status].label.split(' ').map((word, i) => (
+                          <span key={i} className="block sm:inline">{word}{' '}</span>
+                        ))}
                       </p>
                     </div>
                     {idx < 4 && (
-                      <div className={`h-0.5 w-12 mx-2 ${isPassed ? 'bg-purple-500' : 'bg-zinc-800'}`} />
+                      <div className={`h-0.5 w-6 sm:w-12 mx-1 sm:mx-2 flex-shrink-0 ${isPassed ? 'bg-purple-500' : 'bg-zinc-800'}`} />
                     )}
                   </div>
                 );
@@ -169,9 +182,9 @@ export default function OrderDetailPage() {
           </div>
 
           {/* Customer & Order Info */}
-          <div className="grid gap-6 md:grid-cols-2">
-            <div className="rounded-xl bg-zinc-950 border border-zinc-800 p-6">
-              <h3 className="text-lg font-semibold text-white mb-4">Customer Information</h3>
+          <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
+            <div className="rounded-xl bg-zinc-950 border border-zinc-800 p-4 sm:p-6">
+              <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Customer Information</h3>
               <div className="space-y-2 text-sm">
                 <div>
                   <span className="text-zinc-500">Name:</span>
@@ -188,22 +201,22 @@ export default function OrderDetailPage() {
               </div>
             </div>
 
-            <div className="rounded-xl bg-zinc-950 border border-zinc-800 p-6">
-              <h3 className="text-lg font-semibold text-white mb-4">Payment Details</h3>
+            <div className="rounded-xl bg-zinc-950 border border-zinc-800 p-4 sm:p-6">
+              <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Payment Details</h3>
               <div className="space-y-2 text-sm">
-                <div>
+                <div className="flex flex-wrap">
                   <span className="text-zinc-500">Method:</span>
-                  <span className="ml-2 text-white font-medium capitalize">
+                  <span className="ml-2 text-white font-medium capitalize break-all">
                     {order.paymentMethod || 'Not specified'}
                   </span>
                 </div>
                 {order.promoCode && (
-                  <div>
+                  <div className="flex flex-wrap">
                     <span className="text-zinc-500">Promo Code:</span>
                     <span className="ml-2 text-green-400 font-semibold">{order.promoCode}</span>
                   </div>
                 )}
-                <div>
+                <div className="flex flex-wrap">
                   <span className="text-zinc-500">Last Updated:</span>
                   <span className="ml-2 text-white font-medium">
                     {new Date(order.updatedAt).toLocaleDateString('en-IN')}
@@ -214,20 +227,20 @@ export default function OrderDetailPage() {
           </div>
 
           {/* Order Items */}
-          <div className="rounded-xl bg-zinc-950 border border-zinc-800 p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">Order Items</h3>
-            <div className="space-y-4">
+          <div className="rounded-xl bg-zinc-950 border border-zinc-800 p-4 sm:p-6">
+            <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Order Items</h3>
+            <div className="space-y-3 sm:space-y-4">
               {order.items.map((item) => (
-                <div key={item.id} className="flex items-center gap-4 border-b border-zinc-800 pb-4 last:border-0 last:pb-0">
+                <div key={item.id} className="flex items-center gap-3 sm:gap-4 border-b border-zinc-800 pb-3 sm:pb-4 last:border-0 last:pb-0">
                   {item.image && (
-                    <img src={item.image} alt={item.name} className="h-16 w-16 rounded-lg object-cover bg-zinc-900" />
+                    <img src={item.image} alt={item.name} className="h-12 w-12 sm:h-16 sm:w-16 rounded-lg object-cover bg-zinc-900 flex-shrink-0" />
                   )}
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-white">{item.name}</h4>
-                    <p className="text-sm text-zinc-500">Quantity: {item.quantity}</p>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-semibold text-white text-sm sm:text-base truncate">{item.name}</h4>
+                    <p className="text-xs sm:text-sm text-zinc-500">Quantity: {item.quantity}</p>
                   </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-white">{formatPrice(item.price * item.quantity)}</p>
+                  <div className="text-right flex-shrink-0">
+                    <p className="font-semibold text-white text-sm sm:text-base">{formatPrice(item.price * item.quantity)}</p>
                     {item.discount && (
                       <p className="text-xs text-zinc-500 line-through">
                         {formatPrice((item.price / (1 - item.discount / 100)) * item.quantity)}

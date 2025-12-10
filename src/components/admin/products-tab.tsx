@@ -204,7 +204,7 @@ export function ProductsTab({ products }: { products: Product[] }) {
                       </button>
                       <form action={deleteProduct}>
                         <input type="hidden" name="id" value={product.id} />
-                        <button className="rounded-lg border border-zinc-700 bg-zinc-800 p-2 text-red-400 transition hover:bg-red-500/10 hover:border-red-500/50">
+                        <button type="submit" className="rounded-lg border border-zinc-700 bg-zinc-800 p-2 text-red-400 transition hover:bg-red-500/10 hover:border-red-500/50">
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </form>
