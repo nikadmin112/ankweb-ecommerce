@@ -13,18 +13,23 @@ export function CartSummary() {
   const [appliedPromo, setAppliedPromo] = useState<any>(null);
   const [promoLoading, setPromoLoading] = useState(false);
 
+  // Track when appliedPromo changes
+  useEffect(() => {
+    console.log('🔔 appliedPromo state changed:', appliedPromo);
+  }, [appliedPromo]);
+
   const subtotal = items.reduce((sum, item) => {
     const itemPrice = item.discount ? item.price * (1 - item.discount / 100) : item.price;
     return sum + itemPrice * item.quantity;
   }, 0);
 
-  console.log('🔄 CartSummary render - appliedPromo:', appliedPromo, 'subtotal:', subtotal);
+  console.log('🔄 CartSummary render - appliedPromo:', appliedPromo, 'subtotal:', subtotal, 'items:', items.length);
 
   let discount = 0;
   let freeItems: any[] = [];
 
   if (appliedPromo) {
-    console.log('🎫 Promo applied:', {
+    console.log('🎫 Calculating discount for promo:', {
       code: appliedPromo.code,
       type: appliedPromo.discount_type,
       discount_value: appliedPromo.discount_value,
@@ -35,31 +40,25 @@ export function CartSummary() {
 
     if (appliedPromo.discount_type === 'percentage') {
       discount = (subtotal * Number(appliedPromo.discount_value)) / 100;
-      console.log(`✅ Applied ${appliedPromo.discount_value}% OFF - Discount: ₹${discount}`);
-      toast.success(`${appliedPromo.discount_value}% OFF applied! Saved ₹${discount.toFixed(2)}`);
+      console.log(`✅ Percentage discount calculated: ${appliedPromo.discount_value}% of ${subtotal} = ${discount}`);
     } else if (appliedPromo.discount_type === 'fixed') {
       discount = Number(appliedPromo.discount_value);
-      console.log(`✅ Applied FIXED ₹${discount} OFF`);
-      toast.success(`₹${discount} OFF applied!`);
+      console.log(`✅ Fixed discount: ₹${discount}`);
     } else if (appliedPromo.discount_type === 'bogo' && items.length >= 2) {
-      // Sort by price descending to find most expensive item
       const sortedItems = [...items].sort((a, b) => {
         const priceA = a.discount ? a.price * (1 - a.discount / 100) : a.price;
         const priceB = b.discount ? b.price * (1 - b.discount / 100) : b.price;
-        return priceA - priceB; // Ascending order
+        return priceA - priceB;
       });
-      // Make the cheapest item free
       const cheapestItem = sortedItems[0];
       const cheapestPrice = cheapestItem.discount 
         ? cheapestItem.price * (1 - cheapestItem.discount / 100) 
         : cheapestItem.price;
       freeItems = [cheapestItem];
       discount = cheapestPrice;
-      console.log(`✅ BOGO Applied - ${cheapestItem.name} is FREE (₹${cheapestPrice})`);
-      toast.success(`BOGO: ${cheapestItem.name} is FREE!`);
+      console.log(`✅ BOGO discount: ${cheapestItem.name} free = ₹${cheapestPrice}`);
     } else if (appliedPromo.discount_type === 'bogo' && items.length < 2) {
       console.log('⚠️ BOGO requires 2+ items in cart');
-      toast.error('BOGO requires at least 2 items in cart');
     } else if (appliedPromo.discount_type === 'free_service' && appliedPromo.free_product_id) {
       const freeProduct = items.find(i => i.id === appliedPromo.free_product_id);
       console.log(`🔍 Looking for product ${appliedPromo.free_product_id}, found:`, freeProduct);
@@ -69,21 +68,19 @@ export function CartSummary() {
           : freeProduct.price;
         freeItems = [freeProduct];
         discount = freePrice;
-        console.log(`✅ FREE SERVICE Applied - ${freeProduct.name} is FREE (₹${freePrice})`);
-        toast.success(`${freeProduct.name} is FREE!`);
+        console.log(`✅ Free service discount: ${freeProduct.name} = ₹${freePrice}`);
       } else {
         console.log('⚠️ Free product not in cart');
-        toast.error('Add the free service to your cart first');
       }
     } else if (appliedPromo.discount_type === 'free_service' && !appliedPromo.free_product_id) {
       console.log('⚠️ Free service promo missing product ID');
-      toast.error('Invalid promo configuration');
     }
 
-    console.log('💰 Final discount:', discount);
+    console.log('💰 FINAL DISCOUNT CALCULATED:', discount);
   }
 
-  const total = subtotal - discount;
+  const total = Math.max(0, subtotal - discount);
+  console.log('💵 Total calculation: subtotal', subtotal, '- discount', discount, '= total', total);
 
   const applyPromoCode = async () => {
     if (!promoCode.trim()) {
@@ -101,7 +98,19 @@ export function CartSummary() {
       if (promo) {
         console.log('✅ Found promo:', promo);
         setAppliedPromo(promo);
-        toast.success(`Promo code ${promo.code} applied!`);
+        
+        // Show appropriate success message based on promo type
+        if (promo.discount_type === 'percentage') {
+          toast.success(`${promo.discount_value}% discount applied!`);
+        } else if (promo.discount_type === 'fixed') {
+          toast.success(`₹${promo.discount_value} discount applied!`);
+        } else if (promo.discount_type === 'bogo') {
+          toast.success(`Buy 1 Get 1 Free applied!`);
+        } else if (promo.discount_type === 'free_service') {
+          toast.success(`Free service promo applied!`);
+        } else {
+          toast.success(`Promo code ${promo.code} applied!`);
+        }
       } else {
         console.log('❌ Promo code not found:', promoCode);
         toast.error('Invalid promo code');
