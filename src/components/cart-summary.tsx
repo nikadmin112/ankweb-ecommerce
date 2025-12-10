@@ -97,6 +97,14 @@ export function CartSummary() {
 
       if (promo) {
         console.log('✅ Found promo:', promo);
+        
+        // Check if promo is active
+        if (!promo.is_active) {
+          toast.error('This promo code is no longer active');
+          setPromoLoading(false);
+          return;
+        }
+        
         setAppliedPromo(promo);
         
         // Show appropriate success message based on promo type

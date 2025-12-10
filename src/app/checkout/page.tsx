@@ -85,9 +85,12 @@ export default function CheckoutPage() {
         .then(res => res.json())
         .then(promoCodes => {
           const promo = promoCodes.find((p: any) => p.code.toUpperCase() === promoCode.toUpperCase());
-          if (promo) {
+          if (promo && promo.is_active) {
             setAppliedPromo(promo);
             console.log('✅ Promo loaded from cart:', promo);
+          } else if (promo && !promo.is_active) {
+            console.log('⚠️ Promo code is inactive:', promo.code);
+            toast.error('This promo code is no longer active');
           }
         })
         .catch(err => console.error('Failed to load promo:', err));

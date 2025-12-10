@@ -82,6 +82,13 @@ export default function CartPage() {
       const promo = promoCodes.find((p: any) => p.code.toUpperCase() === promoCode.toUpperCase());
 
       if (promo) {
+        // Check if promo is active
+        if (!promo.is_active) {
+          toast.error('This promo code is no longer active');
+          setPromoLoading(false);
+          return;
+        }
+        
         // Check minimum cart value requirement
         if (promo.minCartValue && subtotal < promo.minCartValue) {
           toast.error(`Minimum cart value of ${formatPrice(promo.minCartValue)} required to use this promo code`);
