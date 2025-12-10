@@ -20,7 +20,7 @@ export interface Order {
   subtotal: number;
   discount: number;
   total: number;
-  status: 'order-placed' | 'payment-done' | 'payment-confirmed' | 'order-successful' | 'delivered' | 'cancelled';
+  status: 'pending-payment' | 'order-placed' | 'payment-done' | 'payment-confirmed' | 'order-successful' | 'delivered' | 'cancelled';
   promoCode?: string;
   paymentMethod?: string;
   paymentNationality?: 'indian' | 'international';
