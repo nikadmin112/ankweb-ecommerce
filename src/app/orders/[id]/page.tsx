@@ -41,6 +41,7 @@ export default function OrderDetailPage() {
       const response = await fetch(`/api/orders/${params.id}`);
       if (!response.ok) throw new Error('Order not found');
       const data = await response.json();
+      console.log('📊 Order detail fetched - Status:', data.status, 'Order #:', data.orderNumber);
       setOrder(data);
     } catch (error) {
       toast.error('Failed to load order');
@@ -155,7 +156,7 @@ export default function OrderDetailPage() {
           <div className="rounded-xl bg-zinc-950 border border-zinc-800 p-4 sm:p-6 no-print overflow-hidden">
             <div className="flex items-center justify-between overflow-x-auto pb-2 gap-1 sm:gap-0">
               {(['order-placed', 'payment-done', 'payment-confirmed', 'order-successful', 'delivered'] as const).map((status, idx) => {
-                // Map order status to progress level
+                // Map order status to progress level - THIS USES order.status FROM STATE WHICH UPDATES EVERY 5 SECONDS
                 const statusLevels: Record<string, number> = {
                   'pending-payment': 0,
                   'order-placed': 1,
@@ -166,6 +167,7 @@ export default function OrderDetailPage() {
                   'cancelled': 0
                 };
                 
+                // order.status is updated from fetchOrder() which runs every 5 seconds
                 const currentLevel = statusLevels[order.status] || 0;
                 const thisLevel = statusLevels[status] || 0;
                 const isPassed = currentLevel >= thisLevel;

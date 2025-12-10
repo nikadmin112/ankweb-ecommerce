@@ -7,6 +7,7 @@ import type { Order } from '@/lib/orders-db';
 import Image from 'next/image';
 
 const statusConfig = {
+  'pending-payment': { icon: Clock, color: 'text-orange-400', bg: 'bg-orange-600/10', border: 'border-orange-600/30', label: 'Pending Payment' },
   'order-placed': { icon: Package, color: 'text-blue-400', bg: 'bg-blue-600/10', border: 'border-blue-600/30', label: 'Order Placed' },
   'payment-done': { icon: Clock, color: 'text-yellow-400', bg: 'bg-yellow-600/10', border: 'border-yellow-600/30', label: 'Payment Done' },
   'payment-confirmed': { icon: CheckCircle, color: 'text-purple-400', bg: 'bg-purple-600/10', border: 'border-purple-600/30', label: 'Payment Confirmed' },
@@ -25,7 +26,7 @@ export function OrdersKanban({ orders, onStatusChange, onDeleteOrder }: OrdersKa
   const [selectedScreenshot, setSelectedScreenshot] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   
-  const columns: Order['status'][] = ['order-placed', 'payment-done', 'payment-confirmed', 'order-successful', 'delivered', 'cancelled'];
+  const columns: Order['status'][] = ['pending-payment', 'order-placed', 'payment-done', 'payment-confirmed', 'order-successful', 'delivered', 'cancelled'];
   
   const ordersByStatus = columns.reduce((acc, status) => {
     acc[status] = orders.filter(order => order.status === status);

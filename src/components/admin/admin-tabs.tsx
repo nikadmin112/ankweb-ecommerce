@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { OrdersKanban } from './orders-kanban';
 
 const statusConfig = {
+  'pending-payment': { icon: Clock, color: 'text-orange-400', bg: 'bg-orange-600/10', border: 'border-orange-600/30', label: 'Pending Payment' },
   'order-placed': { icon: Package, color: 'text-blue-400', bg: 'bg-blue-600/10', border: 'border-blue-600/30', label: 'Order Placed' },
   'payment-done': { icon: Clock, color: 'text-yellow-400', bg: 'bg-yellow-600/10', border: 'border-yellow-600/30', label: 'Payment Done' },
   'payment-confirmed': { icon: CheckCircle, color: 'text-purple-400', bg: 'bg-purple-600/10', border: 'border-purple-600/30', label: 'Payment Confirmed' },
@@ -86,6 +87,7 @@ export function OrdersTab() {
 
   const stats = {
     total: orders.length,
+    pendingPayment: orders.filter(o => o.status === 'pending-payment').length,
     orderPlaced: orders.filter(o => o.status === 'order-placed').length,
     paymentDone: orders.filter(o => o.status === 'payment-done').length,
     paymentConfirmed: orders.filter(o => o.status === 'payment-confirmed').length,
@@ -137,13 +139,17 @@ export function OrdersTab() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <div className="rounded-lg border border-zinc-800 bg-zinc-950 p-4">
           <p className="text-sm text-zinc-500">Total Orders</p>
           <p className="mt-2 text-3xl font-bold text-white">{stats.total}</p>
         </div>
+        <div className="rounded-lg border border-orange-600/30 bg-orange-600/10 p-4">
+          <p className="text-sm text-orange-400">Pending Payment</p>
+          <p className="mt-2 text-3xl font-bold text-white">{stats.pendingPayment}</p>
+        </div>
         <div className="rounded-lg border border-yellow-600/30 bg-yellow-600/10 p-4">
-          <p className="text-sm text-yellow-400">Payment Pending</p>
+          <p className="text-sm text-yellow-400">Payment Done</p>
           <p className="mt-2 text-3xl font-bold text-white">{stats.paymentDone}</p>
         </div>
         <div className="rounded-lg border border-purple-600/30 bg-purple-600/10 p-4">
@@ -163,7 +169,7 @@ export function OrdersTab() {
         <>
           {/* Filter Tabs */}
           <div className="flex gap-2 border-b border-zinc-800 overflow-x-auto">
-            {['all', 'order-placed', 'payment-done', 'payment-confirmed', 'order-successful', 'delivered', 'cancelled'].map((status) => (
+            {['all', 'pending-payment', 'order-placed', 'payment-done', 'payment-confirmed', 'order-successful', 'delivered', 'cancelled'].map((status) => (
               <button
                 key={status}
                 onClick={() => setFilterStatus(status)}
@@ -324,7 +330,7 @@ export function OrdersTab() {
                     <div>
                       <h4 className="text-sm font-semibold text-white mb-2">Update Status</h4>
                       <div className="flex gap-2 flex-wrap">
-                        {(['order-placed', 'payment-done', 'payment-confirmed', 'order-successful', 'delivered', 'cancelled'] as const).map((status) => (
+                        {(['pending-payment', 'order-placed', 'payment-done', 'payment-confirmed', 'order-successful', 'delivered', 'cancelled'] as const).map((status) => (
                           <button
                             key={status}
                             onClick={() => updateOrderStatus(order.id, status)}
