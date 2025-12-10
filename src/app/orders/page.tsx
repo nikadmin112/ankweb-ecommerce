@@ -31,11 +31,15 @@ export default function OrdersPage() {
 
   const fetchOrders = async () => {
     try {
-      const response = await fetch(`/api/orders?customerId=${user?.id || 'guest'}`);
+      console.log('🔍 Fetching orders for user:', user);
+      const customerId = user?.id || 'guest';
+      console.log('📦 Using customer ID:', customerId);
+      const response = await fetch(`/api/orders?customerId=${customerId}`);
       const data = await response.json();
+      console.log('✅ Orders fetched:', data.length, 'orders');
       setOrders(data);
     } catch (error) {
-      console.error('Failed to fetch orders:', error);
+      console.error('❌ Failed to fetch orders:', error);
     } finally {
       setLoading(false);
     }

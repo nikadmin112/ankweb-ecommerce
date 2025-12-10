@@ -291,8 +291,12 @@ export default function CheckoutPage() {
         paymentMethodLabel = 'Cryptocurrency';
       }
 
+      console.log('🛒 Creating order for user:', user);
+      const customerId = user?.id || 'guest';
+      console.log('📝 Customer ID:', customerId);
+      
       const orderData = {
-        customerId: user?.id || 'guest',
+        customerId,
         customerName: formData.fullName,
         customerEmail: formData.email,
         customerPhone: formData.phone,

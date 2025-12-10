@@ -155,17 +155,21 @@ export default function OrderDetailPage() {
           <div className="rounded-xl bg-zinc-950 border border-zinc-800 p-4 sm:p-6 no-print overflow-hidden">
             <div className="flex items-center justify-between overflow-x-auto pb-2 gap-1 sm:gap-0">
               {(['order-placed', 'payment-done', 'payment-confirmed', 'order-successful', 'delivered'] as const).map((status, idx) => {
-                // Full status order including pending-payment
-                const fullStatusOrder = ['pending-payment', 'order-placed', 'payment-done', 'payment-confirmed', 'order-successful', 'delivered'];
-                // Get the index of current order status in full order
-                const currentStatusIndex = fullStatusOrder.indexOf(order.status);
-                // Get the index of this displayed status in full order
-                const thisStatusIndex = fullStatusOrder.indexOf(status);
-                // This status is passed if current order status is at or beyond this status
-                const isPassed = currentStatusIndex >= thisStatusIndex;
-                const Icon = statusConfig[status].icon;
+                // Map order status to progress level
+                const statusLevels: Record<string, number> = {
+                  'pending-payment': 0,
+                  'order-placed': 1,
+                  'payment-done': 2,
+                  'payment-confirmed': 3,
+                  'order-successful': 4,
+                  'delivered': 5,
+                  'cancelled': 0
+                };
                 
-                console.log('Progress:', { status, currentStatus: order.status, currentStatusIndex, thisStatusIndex, isPassed });
+                const currentLevel = statusLevels[order.status] || 0;
+                const thisLevel = statusLevels[status] || 0;
+                const isPassed = currentLevel >= thisLevel;
+                const Icon = statusConfig[status].icon;
                 
                 return (
                   <div key={status} className="flex items-center flex-shrink-0">
