@@ -72,7 +72,10 @@ export async function createProduct(product: Omit<LocalProduct, 'id' | 'created_
   const supabase = getServiceClient();
   if (!supabase) throw new Error('Supabase not configured');
 
-  const dbProduct = toDbProduct(product);
+  // Generate a unique ID
+  const id = `prod_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+  const dbProduct = toDbProduct({ ...product, id });
 
   const { data, error } = await supabase
     .from('products')
