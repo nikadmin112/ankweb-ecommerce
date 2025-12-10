@@ -187,7 +187,6 @@ export function CategoriesTab({ categories, onRefresh }: { categories: Category[
               <div className="flex gap-3">
                 <button
                   type="submit"
-                  onClick={() => setEditingId(null)}
                   className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-purple-500/20 hover:bg-purple-500 border border-purple-500"
                 >
                   Save Changes

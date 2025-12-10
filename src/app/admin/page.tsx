@@ -44,8 +44,15 @@ export default function AdminPage() {
   };
 
   const refreshCategories = async () => {
-    const categoriesData = await fetch('/api/categories').then(res => res.json());
-    setCategories(categoriesData);
+    console.log('Refreshing categories...');
+    try {
+      const response = await fetch('/api/categories');
+      const categoriesData = await response.json();
+      console.log('Categories refreshed:', categoriesData);
+      setCategories(categoriesData);
+    } catch (error) {
+      console.error('Failed to refresh categories:', error);
+    }
   };
 
   const refreshProducts = async () => {
