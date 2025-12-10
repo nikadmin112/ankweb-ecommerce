@@ -7,7 +7,7 @@ import { createOfferAction, updateOfferAction, deleteOfferAction } from '@/app/a
 import { setProductDiscountAction, createPromoCodeAction, updatePromoCodeAction, deletePromoCodeAction } from '@/app/admin/promo-actions';
 import { Edit2, Trash2, Plus, Image as ImageIcon, Tag, Percent } from 'lucide-react';
 
-export function OffersTab({ offers }: { offers: Offer[] }) {
+export function OffersTab({ offers, onRefresh }: { offers: Offer[]; onRefresh?: () => Promise<void> }) {
   const [activeSection, setActiveSection] = useState<'banners' | 'discounts' | 'promo'>('banners');
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -100,7 +100,11 @@ export function OffersTab({ offers }: { offers: Offer[] }) {
       {showAddForm && (
         <div className="rounded-lg border border-zinc-800 bg-zinc-950 p-6 shadow-2xl">
           <h3 className="mb-4 text-lg font-semibold text-white">Add New Offer</h3>
-          <form action={createOfferAction} className="space-y-4">
+          <form action={async (formData) => {
+            await createOfferAction(formData);
+            setShowAddForm(false);
+            await onRefresh?.();
+          }} className="space-y-4">
             <label className="flex flex-col gap-2 text-sm text-zinc-400">
               Offer Title *
               <input
@@ -195,9 +199,12 @@ export function OffersTab({ offers }: { offers: Offer[] }) {
                 >
                   <Edit2 className="h-4 w-4" />
                 </button>
-                <form action={deleteOfferAction}>
+                <form action={async (formData) => {
+                  await deleteOfferAction(formData);
+                  await onRefresh?.();
+                }}>
                   <input type="hidden" name="id" value={offer.id} />
-                  <button className="rounded-lg border border-zinc-700 bg-zinc-800 p-2 text-red-400 transition hover:bg-red-500/10 hover:border-red-500/50">
+                  <button type="submit" className="rounded-lg border border-zinc-700 bg-zinc-800 p-2 text-red-400 transition hover:bg-red-500/10 hover:border-red-500/50">
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </form>
@@ -212,7 +219,11 @@ export function OffersTab({ offers }: { offers: Offer[] }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <div className="w-full max-w-lg rounded-lg border border-zinc-800 bg-zinc-950 p-6 shadow-2xl">
             <h3 className="mb-4 text-lg font-semibold text-white">Edit Offer</h3>
-            <form action={updateOfferAction} className="space-y-4">
+            <form action={async (formData) => {
+              await updateOfferAction(formData);
+              setEditingId(null);
+              await onRefresh?.();
+            }} className="space-y-4">
               <input type="hidden" name="id" value={editingId} />
               {(() => {
                 const offer = offers.find(o => o.id === editingId);
@@ -262,7 +273,6 @@ export function OffersTab({ offers }: { offers: Offer[] }) {
               <div className="flex gap-3">
                 <button
                   type="submit"
-                  onClick={() => setEditingId(null)}
                   className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-purple-500/20 hover:bg-purple-500 border border-purple-500"
                 >
                   Save Changes

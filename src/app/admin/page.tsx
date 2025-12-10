@@ -73,6 +73,24 @@ export default function AdminPage() {
     }
   };
 
+  const refreshOffers = async () => {
+    console.log('Refreshing offers...');
+    try {
+      const response = await fetch('/api/offers', { 
+        method: 'POST',
+        cache: 'no-store',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const offersData = await response.json();
+      console.log('Offers refreshed:', offersData);
+      setOffers(offersData);
+    } catch (error) {
+      console.error('Failed to refresh offers:', error);
+    }
+  };
+
   const renderTabContent = () => {
     if (loading) {
       return <div className="text-zinc-500">Loading...</div>;
@@ -84,7 +102,7 @@ export default function AdminPage() {
       case 'categories':
         return <CategoriesTab categories={categories} onRefresh={refreshCategories} />;
       case 'offers':
-        return <OffersTab offers={offers} />;
+        return <OffersTab offers={offers} onRefresh={refreshOffers} />;
       case 'media':
         return <MediaTab />;
       case 'orders':
