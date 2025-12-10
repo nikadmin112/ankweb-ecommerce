@@ -40,7 +40,7 @@ export async function createPromoCodeAction(formData: FormData) {
       ? Number(valueStr) 
       : Number(valueStr) || valueStr; // If number conversion fails, keep as string
 
-    await createPromoCode({ code, discount_type, discount_value: discount_value as any, is_active });
+    await createPromoCode({ code, discount_type: discount_type as any, discount_value, is_active });
     revalidatePath('/admin');
   } catch (error: any) {
     console.error('Error creating promo code:', error);
@@ -68,7 +68,7 @@ export async function updatePromoCodeAction(formData: FormData) {
       ? Number(valueStr) 
       : Number(valueStr) || valueStr; // If number conversion fails, keep as string
 
-    await updatePromoCode(id, { code, discount_type, discount_value: discount_value as any, is_active });
+    await updatePromoCode(id, { code, discount_type: discount_type as any, discount_value, is_active });
     revalidatePath('/admin');
   } catch (error: any) {
     console.error('Error updating promo code:', error);

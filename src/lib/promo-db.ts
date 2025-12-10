@@ -3,8 +3,8 @@ import { getServiceClient } from './supabase';
 export interface PromoCode {
   id: string;
   code: string;
-  discount_type: 'percentage' | 'fixed';
-  discount_value: number;
+  discount_type: 'percentage' | 'fixed' | 'bogo' | 'free_service';
+  discount_value: number | string; // number for percentage/fixed/bogo, string (product ID) for free_service
   usage_limit?: number;
   used_count?: number;
   is_active: boolean;
