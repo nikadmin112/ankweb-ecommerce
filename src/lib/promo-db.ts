@@ -46,9 +46,12 @@ export async function createPromoCode(promo: Omit<PromoCode, 'id' | 'created_at'
   const supabase = getServiceClient();
   if (!supabase) throw new Error('Supabase client not configured');
 
+  // Generate a unique ID
+  const id = `promo_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
   const { data, error } = await supabase
     .from('promo_codes')
-    .insert([promo] as any)
+    .insert([{ ...promo, id }] as any)
     .select()
     .single();
 

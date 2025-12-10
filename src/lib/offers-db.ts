@@ -41,9 +41,12 @@ export async function createOffer(offer: Omit<Offer, 'id' | 'created_at' | 'upda
   const supabase = getServiceClient();
   if (!supabase) throw new Error('Supabase not configured');
 
+  // Generate a unique ID
+  const id = `offer_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
   const { data, error } = await supabase
     .from('offers')
-    .insert([offer] as any)
+    .insert([{ ...offer, id }] as any)
     .select()
     .single();
 
