@@ -32,11 +32,12 @@ function toDbProduct(product: Partial<LocalProduct>): any {
   };
 }
 
-function fromDbProduct(dbProduct: DbProduct): LocalProduct {
+function fromDbProduct(dbProduct: DbProduct): any {
+  const { full_description, review_count, ...rest } = dbProduct;
   return {
-    ...dbProduct,
-    fullDescription: dbProduct.full_description,
-    reviewCount: dbProduct.review_count,
+    ...rest,
+    fullDescription: full_description,
+    reviewCount: review_count,
   };
 }
 
