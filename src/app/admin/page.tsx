@@ -30,9 +30,9 @@ export default function AdminPage() {
   const loadData = () => {
     setLoading(true);
     Promise.all([
-      fetch('/api/products').then(res => res.json()),
-      fetch('/api/categories').then(res => res.json()),
-      fetch('/api/offers').then(res => res.json())
+      fetch('/api/products', { cache: 'no-store' }).then(res => res.json()),
+      fetch('/api/categories', { cache: 'no-store' }).then(res => res.json()),
+      fetch('/api/offers', { cache: 'no-store' }).then(res => res.json())
     ])
       .then(([productsData, categoriesData, offersData]) => {
         setProducts(productsData);
@@ -46,7 +46,7 @@ export default function AdminPage() {
   const refreshCategories = async () => {
     console.log('Refreshing categories...');
     try {
-      const response = await fetch('/api/categories');
+      const response = await fetch('/api/categories', { cache: 'no-store' });
       const categoriesData = await response.json();
       console.log('Categories refreshed:', categoriesData);
       setCategories(categoriesData);
@@ -56,8 +56,15 @@ export default function AdminPage() {
   };
 
   const refreshProducts = async () => {
-    const productsData = await fetch('/api/products').then(res => res.json());
-    setProducts(productsData);
+    console.log('Refreshing products...');
+    try {
+      const response = await fetch('/api/products', { cache: 'no-store' });
+      const productsData = await response.json();
+      console.log('Products refreshed:', productsData);
+      setProducts(productsData);
+    } catch (error) {
+      console.error('Failed to refresh products:', error);
+    }
   };
 
   const renderTabContent = () => {

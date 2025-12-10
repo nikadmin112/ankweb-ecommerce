@@ -42,7 +42,11 @@ export function ProductsTab({ products, onRefresh, categories: initialCategories
       {showAddForm && (
         <div className="rounded-lg border border-zinc-800 bg-zinc-950 p-6 shadow-2xl">
           <h3 className="mb-4 text-lg font-semibold text-white">Add New Service</h3>
-          <form action={createProduct} className="grid gap-4 md:grid-cols-2">
+          <form action={async (formData) => {
+            await createProduct(formData);
+            setShowAddForm(false);
+            await onRefresh?.();
+          }} className="grid gap-4 md:grid-cols-2">
             <label className="flex flex-col gap-2 text-sm text-zinc-400">
               Name *
               <input
@@ -206,7 +210,10 @@ export function ProductsTab({ products, onRefresh, categories: initialCategories
                       >
                         <Edit2 className="h-4 w-4" />
                       </button>
-                      <form action={deleteProduct}>
+                      <form action={async (formData) => {
+                        await deleteProduct(formData);
+                        await onRefresh?.();
+                      }}>
                         <input type="hidden" name="id" value={product.id} />
                         <button type="submit" className="rounded-lg border border-zinc-700 bg-zinc-800 p-2 text-red-400 transition hover:bg-red-500/10 hover:border-red-500/50">
                           <Trash2 className="h-4 w-4" />
@@ -226,7 +233,11 @@ export function ProductsTab({ products, onRefresh, categories: initialCategories
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
           <div className="w-full max-w-2xl rounded-lg border border-zinc-800 bg-zinc-950 p-6 shadow-2xl my-8">
             <h3 className="mb-4 text-lg font-semibold text-white">Edit Product</h3>
-            <form action={updateProduct} className="grid gap-4 md:grid-cols-2">
+            <form action={async (formData) => {
+              await updateProduct(formData);
+              setEditingId(null);
+              await onRefresh?.();
+            }} className="grid gap-4 md:grid-cols-2">
               <input type="hidden" name="id" value={editingId} />
               {(() => {
                 const product = products.find(p => p.id === editingId);
@@ -348,7 +359,6 @@ export function ProductsTab({ products, onRefresh, categories: initialCategories
               <div className="flex gap-3 md:col-span-2">
                 <button
                   type="submit"
-                  onClick={() => setEditingId(null)}
                   className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-purple-500/20 hover:bg-purple-500 border border-purple-500"
                 >
                   Save Changes
