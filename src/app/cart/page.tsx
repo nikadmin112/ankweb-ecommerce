@@ -25,28 +25,46 @@ export default function CartPage() {
   let displayItems = [...items];
 
   if (appliedPromo) {
-    if (appliedPromo.type === 'percentage') {
-      discount = (subtotal * Number(appliedPromo.value)) / 100;
-    } else if (appliedPromo.type === 'bogo' && items.length >= 2) {
-      // BOGO: Sort by price DESC, make the cheaper one (last) free
-      const sortedByPrice = [...items].sort((a, b) => b.price - a.price);
-      const cheaperItem = sortedByPrice[sortedByPrice.length - 1];
-      freeItems = [cheaperItem];
-      const cheaperItemPrice = cheaperItem.discount ? cheaperItem.price * (1 - cheaperItem.discount / 100) : cheaperItem.price;
-      discount = cheaperItemPrice;
-    } else if (appliedPromo.type === 'free_service' && freeServiceProduct) {
-      // Add free service product to display if not already in cart
-      const existingProduct = items.find(i => i.id === appliedPromo.value);
-      if (!existingProduct) {
-        displayItems = [...items, { ...freeServiceProduct, quantity: 1, isPromoFree: true }];
-      } else {
+    console.log('🎫 Cart Page - Promo applied:', appliedPromo);
+    
+    if (appliedPromo.discount_type === 'percentage') {
+      discount = (subtotal * Number(appliedPromo.discount_value)) / 100;
+      console.log(`✅ Percentage: ${appliedPromo.discount_value}% of ${subtotal} = ${discount}`);
+    } else if (appliedPromo.discount_type === 'fixed') {
+      discount = Number(appliedPromo.discount_value);
+      console.log(`✅ Fixed: ${discount}`);
+    } else if (appliedPromo.discount_type === 'bogo' && items.length >= 2) {
+      // BOGO: Sort by price ASC, make the cheapest one free
+      const sortedByPrice = [...items].sort((a, b) => {
+        const priceA = a.discount ? a.price * (1 - a.discount / 100) : a.price;
+        const priceB = b.discount ? b.price * (1 - b.discount / 100) : b.price;
+        return priceA - priceB;
+      });
+      const cheapestItem = sortedByPrice[0];
+      freeItems = [cheapestItem];
+      const cheapestPrice = cheapestItem.discount ? cheapestItem.price * (1 - cheapestItem.discount / 100) : cheapestItem.price;
+      discount = cheapestPrice;
+      console.log(`✅ BOGO: ${cheapestItem.name} free = ${discount}`);
+    } else if (appliedPromo.discount_type === 'free_service' && appliedPromo.free_product_id) {
+      // Find product in cart or fetch it
+      const existingProduct = items.find(i => i.id === appliedPromo.free_product_id);
+      if (existingProduct) {
         freeItems = [existingProduct];
+        const freePrice = existingProduct.discount 
+          ? existingProduct.price * (1 - existingProduct.discount / 100) 
+          : existingProduct.price;
+        discount = freePrice;
+        console.log(`✅ Free service in cart: ${existingProduct.name} = ${discount}`);
+      } else if (freeServiceProduct) {
+        displayItems = [...items, { ...freeServiceProduct, quantity: 1, isPromoFree: true }];
+        const freePrice = freeServiceProduct.discount 
+          ? freeServiceProduct.price * (1 - freeServiceProduct.discount / 100) 
+          : freeServiceProduct.price;
+        discount = freePrice;
+        console.log(`✅ Free service added: ${freeServiceProduct.name} = ${discount}`);
       }
-      const freePrice = freeServiceProduct.discount 
-        ? freeServiceProduct.price * (1 - freeServiceProduct.discount / 100) 
-        : freeServiceProduct.price;
-      discount = freePrice;
     }
+    console.log('💰 Final discount:', discount);
   }
 
   const total = Math.max(0, subtotal - discount);
@@ -72,10 +90,10 @@ export default function CartPage() {
         }
 
         // If free service, fetch the product details
-        if (promo.type === 'free_service') {
+        if (promo.discount_type === 'free_service' && promo.free_product_id) {
           const productsResponse = await fetch('/api/products');
           const products = await productsResponse.json();
-          const freeProduct = products.find((p: any) => p.id === promo.value);
+          const freeProduct = products.find((p: any) => p.id === promo.free_product_id);
           if (freeProduct) {
             setFreeServiceProduct(freeProduct);
           } else {
@@ -85,7 +103,20 @@ export default function CartPage() {
           }
         }
         setAppliedPromo(promo);
-        toast.success(`Promo code ${promo.code} applied!`);
+        console.log('✅ Promo applied successfully:', promo);
+        
+        // Show specific success message
+        if (promo.discount_type === 'percentage') {
+          toast.success(`${promo.discount_value}% discount applied!`);
+        } else if (promo.discount_type === 'fixed') {
+          toast.success(`₹${promo.discount_value} discount applied!`);
+        } else if (promo.discount_type === 'bogo') {
+          toast.success(`Buy 1 Get 1 Free applied!`);
+        } else if (promo.discount_type === 'free_service') {
+          toast.success(`Free service promo applied!`);
+        } else {
+          toast.success(`Promo code ${promo.code} applied!`);
+        }
       } else {
         toast.error('Invalid promo code');
       }
