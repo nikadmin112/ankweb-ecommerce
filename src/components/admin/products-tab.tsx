@@ -6,17 +6,21 @@ import type { Category } from '@/lib/categories-db';
 import { createProduct, deleteProduct, updateProduct } from '@/app/admin/actions';
 import { Edit2, Trash2, Plus } from 'lucide-react';
 
-export function ProductsTab({ products }: { products: Product[] }) {
+export function ProductsTab({ products, onRefresh, categories: initialCategories }: { products: Product[]; onRefresh?: () => Promise<void>; categories?: Category[] }) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<Category[]>(initialCategories || []);
 
   useEffect(() => {
-    fetch('/api/categories')
-      .then(res => res.json())
-      .then(data => setCategories(data))
-      .catch(err => console.error('Failed to load categories:', err));
-  }, []);
+    if (initialCategories) {
+      setCategories(initialCategories);
+    } else {
+      fetch('/api/categories')
+        .then(res => res.json())
+        .then(data => setCategories(data))
+        .catch(err => console.error('Failed to load categories:', err));
+    }
+  }, [initialCategories]);
 
   return (
     <div className="space-y-6">

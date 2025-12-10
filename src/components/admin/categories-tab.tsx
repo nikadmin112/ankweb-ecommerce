@@ -11,7 +11,7 @@ const AVAILABLE_ICONS = [
   'Palette', 'Scissors', 'Dumbbell', 'Baby', 'Sparkles'
 ];
 
-export function CategoriesTab({ categories }: { categories: Category[] }) {
+export function CategoriesTab({ categories, onRefresh }: { categories: Category[]; onRefresh?: () => Promise<void> }) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [customIcon, setCustomIcon] = useState('');
@@ -41,6 +41,7 @@ export function CategoriesTab({ categories }: { categories: Category[] }) {
               await createCategoryAction(formData);
               setShowAddForm(false);
               setCustomIcon('');
+              await onRefresh?.();
             }} 
             className="space-y-4"
           >
@@ -131,7 +132,10 @@ export function CategoriesTab({ categories }: { categories: Category[] }) {
                 >
                   <Edit2 className="h-4 w-4" />
                 </button>
-                <form action={deleteCategoryAction}>
+                <form action={async (formData) => {
+                  await deleteCategoryAction(formData);
+                  await onRefresh?.();
+                }}>
                   <input type="hidden" name="id" value={category.id} />
                   <button type="submit" className="rounded-lg border border-zinc-700 bg-zinc-800 p-2 text-red-400 transition hover:bg-red-500/10 hover:border-red-500/50">
                     <Trash2 className="h-4 w-4" />
@@ -148,7 +152,11 @@ export function CategoriesTab({ categories }: { categories: Category[] }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <div className="w-full max-w-md rounded-lg border border-zinc-800 bg-zinc-950 p-6 shadow-2xl">
             <h3 className="mb-4 text-lg font-semibold text-white">Edit Category</h3>
-            <form action={updateCategoryAction} className="space-y-4">
+            <form action={async (formData) => {
+              await updateCategoryAction(formData);
+              setEditingId(null);
+              await onRefresh?.();
+            }} className="space-y-4">
               <input type="hidden" name="id" value={editingId} />
               {(() => {
                 const category = categories.find(c => c.id === editingId);

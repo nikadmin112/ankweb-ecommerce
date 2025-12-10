@@ -24,6 +24,11 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = () => {
+    setLoading(true);
     Promise.all([
       fetch('/api/products').then(res => res.json()),
       fetch('/api/categories').then(res => res.json()),
@@ -36,7 +41,17 @@ export default function AdminPage() {
         setLoading(false);
       })
       .catch(() => setLoading(false));
-  }, []);
+  };
+
+  const refreshCategories = async () => {
+    const categoriesData = await fetch('/api/categories').then(res => res.json());
+    setCategories(categoriesData);
+  };
+
+  const refreshProducts = async () => {
+    const productsData = await fetch('/api/products').then(res => res.json());
+    setProducts(productsData);
+  };
 
   const renderTabContent = () => {
     if (loading) {
@@ -45,9 +60,9 @@ export default function AdminPage() {
 
     switch (activeTab) {
       case 'products':
-        return <ProductsTab products={products} />;
+        return <ProductsTab products={products} onRefresh={refreshProducts} categories={categories} />;
       case 'categories':
-        return <CategoriesTab categories={categories} />;
+        return <CategoriesTab categories={categories} onRefresh={refreshCategories} />;
       case 'offers':
         return <OffersTab offers={offers} />;
       case 'media':
