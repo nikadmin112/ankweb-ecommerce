@@ -25,17 +25,25 @@ export async function setProductDiscountAction(formData: FormData) {
 }
 
 export async function createPromoCodeAction(formData: FormData) {
-  const code = (formData.get('code') as string).toUpperCase();
-  const discount_type = formData.get('type') as 'percentage' | 'fixed';
-  const discount_value = Number(formData.get('value')) || 0;
-  const is_active = true;
+  try {
+    const code = (formData.get('code') as string).toUpperCase();
+    const discount_type = formData.get('type') as 'percentage' | 'fixed';
+    const discount_value = Number(formData.get('value')) || 0;
+    const is_active = true;
 
-  if (!code || !discount_type || !discount_value) {
-    throw new Error('Code, type, and value are required');
+    if (!code || !discount_type || !discount_value) {
+      throw new Error('Code, type, and value are required');
+    }
+
+    await createPromoCode({ code, discount_type, discount_value, is_active });
+    revalidatePath('/admin');
+  } catch (error: any) {
+    console.error('Error creating promo code:', error);
+    if (error.code === '23505' || error.message?.includes('duplicate key')) {
+      throw new Error(`Promo code already exists. Please use a different code or delete the existing one first.`);
+    }
+    throw error;
   }
-
-  await createPromoCode({ code, discount_type, discount_value, is_active });
-  revalidatePath('/admin');
 }
 
 export async function deletePromoCodeAction(formData: FormData) {
