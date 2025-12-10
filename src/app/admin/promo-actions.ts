@@ -35,12 +35,21 @@ export async function createPromoCodeAction(formData: FormData) {
       throw new Error('Code, type, and value are required');
     }
 
-    // For percentage and fixed, convert to number. For free_service, keep as string (product ID)
-    const discount_value = (discount_type === 'percentage' || discount_type === 'fixed') 
-      ? Number(valueStr) 
-      : Number(valueStr) || valueStr; // If number conversion fails, keep as string
+    // For free_service, use free_product_id. For others, use discount_value
+    const promoData: any = {
+      code,
+      discount_type: discount_type as any,
+      is_active
+    };
 
-    await createPromoCode({ code, discount_type: discount_type as any, discount_value, is_active });
+    if (discount_type === 'free_service') {
+      promoData.free_product_id = valueStr;
+      promoData.discount_value = 0; // Set to 0 for free_service
+    } else {
+      promoData.discount_value = Number(valueStr);
+    }
+
+    await createPromoCode(promoData);
     revalidatePath('/admin');
   } catch (error: any) {
     console.error('Error creating promo code:', error);
@@ -63,12 +72,22 @@ export async function updatePromoCodeAction(formData: FormData) {
       throw new Error('ID, code, type, and value are required');
     }
 
-    // For percentage and fixed, convert to number. For free_service, keep as string (product ID)
-    const discount_value = (discount_type === 'percentage' || discount_type === 'fixed') 
-      ? Number(valueStr) 
-      : Number(valueStr) || valueStr; // If number conversion fails, keep as string
+    // For free_service, use free_product_id. For others, use discount_value
+    const updateData: any = {
+      code,
+      discount_type: discount_type as any,
+      is_active
+    };
 
-    await updatePromoCode(id, { code, discount_type: discount_type as any, discount_value, is_active });
+    if (discount_type === 'free_service') {
+      updateData.free_product_id = valueStr;
+      updateData.discount_value = 0;
+    } else {
+      updateData.discount_value = Number(valueStr);
+      updateData.free_product_id = null; // Clear free_product_id for non-free_service types
+    }
+
+    await updatePromoCode(id, updateData);
     revalidatePath('/admin');
   } catch (error: any) {
     console.error('Error updating promo code:', error);

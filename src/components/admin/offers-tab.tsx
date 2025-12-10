@@ -553,20 +553,39 @@ export function OffersTab({ offers }: { offers: Offer[] }) {
                       >
                         <option value="percentage">Percentage Discount</option>
                         <option value="fixed">Fixed Amount</option>
+                        <option value="bogo">Buy 1 Get 1 Free</option>
+                        <option value="free_service">Free Service</option>
                       </select>
                     </label>
 
                     <label className="flex flex-col gap-2 text-sm text-zinc-400">
-                      Discount Value *
-                      <input
-                        name="value"
-                        type="number"
-                        min="1"
-                        step="0.01"
-                        required
-                        defaultValue={promo.discount_value}
-                        className="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-white focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500/50"
-                      />
+                      Value *
+                      {promo.discount_type === 'free_service' ? (
+                        <input
+                          name="value"
+                          type="text"
+                          required
+                          defaultValue={promo.free_product_id || ''}
+                          placeholder="Product ID"
+                          className="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-white focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500/50"
+                        />
+                      ) : promo.discount_type === 'bogo' ? (
+                        <input
+                          name="value"
+                          type="hidden"
+                          defaultValue="1"
+                        />
+                      ) : (
+                        <input
+                          name="value"
+                          type="number"
+                          min="1"
+                          step="0.01"
+                          required
+                          defaultValue={promo.discount_value}
+                          className="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-white focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500/50"
+                        />
+                      )}
                     </label>
 
                     <label className="flex items-center gap-2 text-sm text-zinc-400">

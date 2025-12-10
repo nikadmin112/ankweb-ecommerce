@@ -4,7 +4,8 @@ export interface PromoCode {
   id: string;
   code: string;
   discount_type: 'percentage' | 'fixed' | 'bogo' | 'free_service';
-  discount_value: number | string; // number for percentage/fixed/bogo, string (product ID) for free_service
+  discount_value: number; // numeric value for percentage/fixed/bogo
+  free_product_id?: string; // product ID for free_service type
   usage_limit?: number;
   used_count?: number;
   is_active: boolean;

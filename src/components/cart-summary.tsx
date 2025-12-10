@@ -40,8 +40,8 @@ export function CartSummary() {
         : cheapestItem.price;
       freeItems = [cheapestItem];
       discount = cheapestPrice;
-    } else if (appliedPromo.discount_type === 'free_service') {
-      const freeProduct = items.find(i => i.id === String(appliedPromo.discount_value));
+    } else if (appliedPromo.discount_type === 'free_service' && appliedPromo.free_product_id) {
+      const freeProduct = items.find(i => i.id === appliedPromo.free_product_id);
       if (freeProduct) {
         const freePrice = freeProduct.discount 
           ? freeProduct.price * (1 - freeProduct.discount / 100) 
