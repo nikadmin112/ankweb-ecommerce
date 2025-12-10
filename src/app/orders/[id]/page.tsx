@@ -155,12 +155,17 @@ export default function OrderDetailPage() {
           <div className="rounded-xl bg-zinc-950 border border-zinc-800 p-4 sm:p-6 no-print overflow-hidden">
             <div className="flex items-center justify-between overflow-x-auto pb-2 gap-1 sm:gap-0">
               {(['order-placed', 'payment-done', 'payment-confirmed', 'order-successful', 'delivered'] as const).map((status, idx) => {
-                const statusOrder = ['pending-payment', 'order-placed', 'payment-done', 'payment-confirmed', 'order-successful', 'delivered'];
-                const currentIndex = statusOrder.indexOf(order.status);
-                const isActive = order.status === status;
-                // Status is passed if current order status index is greater than or equal to this step
-                const isPassed = currentIndex >= 0 && currentIndex >= (idx + 1); // +1 because we removed pending-payment from display
+                // Full status order including pending-payment
+                const fullStatusOrder = ['pending-payment', 'order-placed', 'payment-done', 'payment-confirmed', 'order-successful', 'delivered'];
+                // Get the index of current order status in full order
+                const currentStatusIndex = fullStatusOrder.indexOf(order.status);
+                // Get the index of this displayed status in full order
+                const thisStatusIndex = fullStatusOrder.indexOf(status);
+                // This status is passed if current order status is at or beyond this status
+                const isPassed = currentStatusIndex >= thisStatusIndex;
                 const Icon = statusConfig[status].icon;
+                
+                console.log('Progress:', { status, currentStatus: order.status, currentStatusIndex, thisStatusIndex, isPassed });
                 
                 return (
                   <div key={status} className="flex items-center flex-shrink-0">
