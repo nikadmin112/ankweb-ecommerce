@@ -23,11 +23,12 @@ interface DbProduct {
   updated_at?: string;
 }
 
-function toDbProduct(product: Partial<LocalProduct>): Partial<DbProduct> {
+function toDbProduct(product: Partial<LocalProduct>): any {
+  const { fullDescription, reviewCount, ...rest } = product;
   return {
-    ...product,
-    full_description: product.fullDescription,
-    review_count: product.reviewCount ?? undefined,
+    ...rest,
+    full_description: fullDescription,
+    review_count: reviewCount,
   };
 }
 
