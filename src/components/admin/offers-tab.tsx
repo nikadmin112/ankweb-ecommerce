@@ -15,9 +15,27 @@ export function OffersTab({ offers }: { offers: Offer[] }) {
   const [promoCodes, setPromoCodes] = useState<any[]>([]);
   const [selectedPromoType, setSelectedPromoType] = useState<string>('percentage');
 
-  const refreshData = () => {
-    fetch('/api/products').then(r => r.json()).then(setProducts);
-    fetch('/api/promo-codes').then(r => r.json()).then(setPromoCodes).catch(() => setPromoCodes([]));
+  const refreshData = async () => {
+    try {
+      const productsRes = await fetch('/api/products', { cache: 'no-store' });
+      const productsData = await productsRes.json();
+      setProducts(productsData);
+    } catch (error) {
+      console.error('Failed to fetch products:', error);
+    }
+    
+    try {
+      const promoRes = await fetch('/api/promo-codes', { 
+        method: 'POST',
+        cache: 'no-store',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const promoData = await promoRes.json();
+      setPromoCodes(promoData);
+    } catch (error) {
+      console.error('Failed to fetch promo codes:', error);
+      setPromoCodes([]);
+    }
   };
 
   useEffect(() => {
@@ -334,7 +352,15 @@ export function OffersTab({ offers }: { offers: Offer[] }) {
           {showAddForm && (
             <div className="rounded-lg border border-zinc-800 bg-zinc-950 p-6 shadow-2xl">
               <h3 className="mb-4 text-lg font-semibold text-white">Create Promo Code</h3>
-              <form action={createPromoCodeAction} className="space-y-4">
+              <form action={async (formData) => {
+                try {
+                  await createPromoCodeAction(formData);
+                  setShowAddForm(false);
+                  await refreshData();
+                } catch (error: any) {
+                  alert(error.message || 'Failed to create promo code');
+                }
+              }} className="space-y-4">
                 <label className="flex flex-col gap-2 text-sm text-zinc-400">
                   Promo Code *
                   <input
@@ -464,9 +490,12 @@ export function OffersTab({ offers }: { offers: Offer[] }) {
                       )}
                     </div>
                   </div>
-                  <form action={deletePromoCodeAction}>
+                  <form action={async (formData) => {
+                    await deletePromoCodeAction(formData);
+                    await refreshData();
+                  }}>
                     <input type="hidden" name="id" value={promo.id} />
-                    <button className="rounded-lg border border-zinc-700 bg-zinc-800 p-2 text-red-400 transition hover:bg-red-500/10 hover:border-red-500/50">
+                    <button type="submit" className="rounded-lg border border-zinc-700 bg-zinc-800 p-2 text-red-400 transition hover:bg-red-500/10 hover:border-red-500/50">
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </form>
