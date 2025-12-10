@@ -38,7 +38,12 @@ export default function OrderDetailPage() {
 
   const fetchOrder = async () => {
     try {
-      const response = await fetch(`/api/orders/${params.id}`);
+      const response = await fetch(`/api/orders/${params.id}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
+      });
       if (!response.ok) throw new Error('Order not found');
       const data = await response.json();
       console.log('📊 Order detail fetched - Status:', data.status, 'Order #:', data.orderNumber);
