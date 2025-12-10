@@ -46,7 +46,7 @@ export default function AdminPage() {
   const refreshCategories = async () => {
     console.log('Refreshing categories...');
     try {
-      const response = await fetch('/api/categories', { cache: 'no-store' });
+      const response = await fetch(`/api/categories?t=${Date.now()}`, { cache: 'no-store' });
       const categoriesData = await response.json();
       console.log('Categories refreshed:', categoriesData);
       setCategories(categoriesData);

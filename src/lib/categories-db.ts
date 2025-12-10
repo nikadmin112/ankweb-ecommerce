@@ -12,12 +12,17 @@ export async function getAllCategories(): Promise<Category[]> {
   const supabase = getServiceClient();
   if (!supabase) throw new Error('Supabase not configured');
 
+  console.log('[DB] Querying categories table...');
   const { data, error } = await supabase
     .from('categories')
     .select('*')
     .order('created_at', { ascending: false });
 
-  if (error) throw error;
+  if (error) {
+    console.error('[DB] Error querying categories:', error);
+    throw error;
+  }
+  console.log('[DB] Categories returned from Supabase:', data?.length, 'items');
   return data || [];
 }
 
