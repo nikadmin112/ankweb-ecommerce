@@ -2,6 +2,7 @@
 
 import { Search, SlidersHorizontal, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import type { Category } from '@/lib/categories-db';
 
 export interface FilterState {
   search: string;
@@ -12,7 +13,7 @@ export interface FilterState {
 }
 
 interface ShopFiltersProps {
-  categories: string[];
+  categories: Category[];
   onFilterChange?: (filters: FilterState) => void;
 }
 
@@ -86,8 +87,8 @@ export function ShopFilters({ categories, onFilterChange }: ShopFiltersProps) {
                 >
                   <option value="">All categories</option>
                   {categories.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
+                    <option key={cat.id} value={cat.name}>
+                      {cat.name}
                     </option>
                   ))}
                 </select>

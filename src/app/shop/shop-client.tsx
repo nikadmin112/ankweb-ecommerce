@@ -5,10 +5,11 @@ import { ShopFilters, type FilterState } from '@/components/shop-filters';
 import { ProductGrid } from '@/components/product-grid';
 import { Pagination } from '@/components/pagination';
 import type { Product } from '@/types';
+import type { Category } from '@/lib/categories-db';
 
 interface ShopClientProps {
   initialProducts: Product[];
-  categories: string[];
+  categories: Category[];
   filters: FilterState;
   onFilterChange: (filters: FilterState) => void;
 }

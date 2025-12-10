@@ -1,13 +1,16 @@
 import { Suspense } from 'react';
 import { fetchProducts } from '@/lib/products';
+import { getAllCategories } from '@/lib/categories-db';
 import { ProductGridSkeleton } from '@/components/skeletons';
 import { ShopWrapper } from './shop-wrapper';
 import { TopNavBoxes } from '@/components/top-nav-boxes';
 import { OfferCarousel } from '@/components/offer-carousel';
 
 async function ShopContent() {
-  const allProducts = await fetchProducts();
-  const categories = Array.from(new Set(allProducts.map((p) => p.category).filter(Boolean))) as string[];
+  const [allProducts, categories] = await Promise.all([
+    fetchProducts(),
+    getAllCategories()
+  ]);
   return <ShopWrapper initialProducts={allProducts} categories={categories} />;
 }
 

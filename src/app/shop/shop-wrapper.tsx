@@ -6,10 +6,11 @@ import { ShopClient } from './shop-client';
 import { CategoryIcons } from '@/components/category-icons';
 import { OfferCarousel } from '@/components/offer-carousel';
 import type { Product } from '@/types';
+import type { Category } from '@/lib/categories-db';
 
 interface ShopWrapperProps {
   initialProducts: Product[];
-  categories: string[];
+  categories: Category[];
 }
 
 export function ShopWrapper({ initialProducts, categories }: ShopWrapperProps) {
