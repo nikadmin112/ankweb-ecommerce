@@ -82,6 +82,8 @@ export function ProductDetailClient({
               <p className="text-zinc-600">No image available</p>
             </div>
           )}
+          {/* DEBUG: Show image URL for troubleshooting */}
+          <div className="mt-2 text-xs text-zinc-400 break-all">Image URL: {product.image || '(none)'}</div>
         </div>
 
         {/* Product details */}
