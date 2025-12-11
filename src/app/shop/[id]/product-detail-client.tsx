@@ -67,7 +67,7 @@ export function ProductDetailClient({
         {/* Product image */}
         <div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 shadow-2xl">
           {product.image && product.image.trim() !== '' ? (
-            <div className="relative w-full h-96">
+            <div className="relative w-full aspect-[4/3]">
               <Image
                 src={product.image}
                 alt={product.name}
@@ -78,12 +78,10 @@ export function ProductDetailClient({
               />
             </div>
           ) : (
-            <div className="flex h-96 items-center justify-center bg-zinc-900">
+            <div className="flex aspect-[4/3] items-center justify-center bg-zinc-900">
               <p className="text-zinc-600">No image available</p>
             </div>
           )}
-          {/* DEBUG: Show image URL for troubleshooting */}
-          <div className="mt-2 text-xs text-zinc-400 break-all">Image URL: {product.image || '(none)'}</div>
         </div>
 
         {/* Product details */}
