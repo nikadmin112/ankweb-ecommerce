@@ -130,6 +130,7 @@ export function PaymentSettingsTab() {
 
   const paymentMethods = [
     { id: 'upi', label: 'UPI (India)', icon: DollarSign },
+    { id: 'bankIndia', label: 'Bank (India)', icon: CreditCard },
     { id: 'remitly', label: 'Remitly', icon: DollarSign },
     { id: 'paysend', label: 'Paysend', icon: DollarSign },
     { id: 'westernUnion', label: 'Western Union', icon: DollarSign },
@@ -166,36 +167,58 @@ export function PaymentSettingsTab() {
         ))}
       </div>
 
-      {/* Settings Form */}
-      <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-6">
-        {activeMethod === 'upi' && (
+
+        {/* Bank (India) Payment Option */}
+        {activeMethod === 'bankIndia' && (
           <div className="space-y-6">
             <h3 className="text-lg font-semibold text-white mb-4">
-              UPI Payment Details (For QR Code Generation)
+              Bank (India) Payment Details
             </h3>
-
-            <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-2">
-                UPI ID *
-              </label>
-              <input
-                type="text"
-                value={formData.upiId}
-                onChange={(e) => setFormData({ ...formData, upiId: e.target.value })}
-                className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3 text-white placeholder-zinc-600 focus:border-purple-500 focus:outline-none"
-                placeholder="yourname@upi"
-              />
-              <p className="mt-2 text-sm text-zinc-500">
-                This UPI ID will be used to generate QR codes for customer payments
-              </p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className="block text-sm font-medium text-zinc-300 mb-2">Account Holder Name</label>
+                <input
+                  type="text"
+                  value={formData.accountHolderName}
+                  onChange={(e) => setFormData({ ...formData, accountHolderName: e.target.value })}
+                  className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3 text-white placeholder-zinc-600 focus:border-purple-500 focus:outline-none"
+                  placeholder="Account Holder Name"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-zinc-300 mb-2">Account Number</label>
+                <input
+                  type="text"
+                  value={formData.accountNumber}
+                  onChange={(e) => setFormData({ ...formData, accountNumber: e.target.value })}
+                  className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3 text-white placeholder-zinc-600 focus:border-purple-500 focus:outline-none"
+                  placeholder="Account Number"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-zinc-300 mb-2">IFSC Code</label>
+                <input
+                  type="text"
+                  value={formData.ifscCode}
+                  onChange={(e) => setFormData({ ...formData, ifscCode: e.target.value })}
+                  className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3 text-white placeholder-zinc-600 focus:border-purple-500 focus:outline-none"
+                  placeholder="IFSC Code"
+                />
+              </div>
             </div>
-
+            {/* Screenshot Upload (same as UPI) */}
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-zinc-300 mb-2">Payment Screenshot</label>
+              {/* TODO: Integrate ImageUpload component here for screenshot upload */}
+              <input type="file" accept="image/*" className="w-full" />
+              <p className="mt-2 text-xs text-zinc-500">Upload screenshot of your bank payment for verification.</p>
+            </div>
             <button
               onClick={handleSave}
               className="flex items-center gap-2 px-6 py-3 rounded-lg bg-purple-600 text-white font-semibold hover:bg-purple-500 transition"
             >
               <Save className="h-4 w-4" />
-              Save UPI Settings
+              Save Bank Settings
             </button>
           </div>
         )}
