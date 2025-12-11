@@ -65,7 +65,7 @@ export function ProductDetailClient({
 
       <div className="mt-8 grid gap-10 lg:grid-cols-2">
         {/* Product image */}
-        <div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 shadow-2xl">
+        <div className="overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950 shadow-xl max-w-md mx-auto">
           {product.image && product.image.trim() !== '' ? (
             <div className="relative w-full aspect-[4/3]">
               <Image
