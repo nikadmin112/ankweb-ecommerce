@@ -65,9 +65,9 @@ export function ProductDetailClient({
 
       <div className="mt-8 grid gap-10 lg:grid-cols-2">
         {/* Product image */}
-        <div className="overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950 shadow-xl max-w-md mx-auto">
+        <div className="overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950 shadow-xl w-full max-w-md mx-auto">
           {product.image && product.image.trim() !== '' ? (
-            <div className="relative w-full h-64 md:h-96">
+            <div className="relative w-full min-h-[16rem]">
               <Image
                 src={product.image}
                 alt={product.name}
@@ -75,10 +75,11 @@ export function ProductDetailClient({
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"
                 priority
+                onError={(e) => { e.currentTarget.src = '/fallback.png'; }}
               />
             </div>
           ) : (
-            <div className="flex w-full h-64 md:h-96 items-center justify-center bg-zinc-900">
+            <div className="flex w-full min-h-[16rem] items-center justify-center bg-zinc-900">
               <p className="text-zinc-600">No image available</p>
             </div>
           )}
