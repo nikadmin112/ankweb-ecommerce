@@ -272,6 +272,32 @@ export function CartSummary() {
         </div>
       </div>
 
+      {/* Payment Method Section */}
+      <div className="border-t border-zinc-800 pt-4 space-y-4">
+        <h3 className="text-lg font-semibold text-white">Payment Method</h3>
+        <div className="flex gap-4">
+          <button className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-semibold text-white border border-purple-500 transition hover:bg-purple-500">Indian Payment</button>
+        </div>
+        {/* Indian Payment Options */}
+        <div className="mt-4 flex gap-4">
+          <button className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white border border-zinc-800 transition hover:bg-purple-500">UPI</button>
+          <button className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white border border-zinc-800 transition hover:bg-purple-500">Bank Account</button>
+        </div>
+        {/* If Bank Account selected, show details and screenshot upload */}
+        {/* Replace below with dynamic state logic as needed */}
+        <div className="mt-4 rounded-lg border border-zinc-800 bg-zinc-950 p-4">
+          <h4 className="text-md font-semibold text-white mb-2">Bank Details</h4>
+          <p className="text-sm text-zinc-400">Account Holder: <span className="font-bold">(from admin)</span></p>
+          <p className="text-sm text-zinc-400">Account Number: <span className="font-bold">(from admin)</span></p>
+          <p className="text-sm text-zinc-400">IFSC Code: <span className="font-bold">(from admin)</span></p>
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-zinc-300 mb-2">Upload Payment Screenshot</label>
+            <input type="file" accept="image/*" className="w-full" />
+            <p className="mt-2 text-xs text-zinc-500">Upload screenshot of your bank payment for verification.</p>
+          </div>
+        </div>
+      </div>
+
       <button className="w-full rounded-lg bg-purple-600 border border-purple-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-purple-500/20 transition hover:bg-purple-500">
         Checkout
       </button>
