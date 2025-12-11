@@ -167,7 +167,37 @@ export function PaymentSettingsTab() {
         ))}
       </div>
 
-
+      {/* Settings Form - WRAPPED IN DIV TO FIX JSX */}
+      <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-6">
+        {activeMethod === 'upi' && (
+          <div className="space-y-6">
+            <h3 className="text-lg font-semibold text-white mb-4">
+              UPI Payment Details (For QR Code Generation)
+            </h3>
+            <div>
+              <label className="block text-sm font-medium text-zinc-300 mb-2">
+                UPI ID *
+              </label>
+              <input
+                type="text"
+                value={formData.upiId}
+                onChange={(e) => setFormData({ ...formData, upiId: e.target.value })}
+                className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3 text-white placeholder-zinc-600 focus:border-purple-500 focus:outline-none"
+                placeholder="yourname@upi"
+              />
+              <p className="mt-2 text-sm text-zinc-500">
+                This UPI ID will be used to generate QR codes for customer payments
+              </p>
+            </div>
+            <button
+              onClick={handleSave}
+              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-purple-600 text-white font-semibold hover:bg-purple-500 transition"
+            >
+              <Save className="h-4 w-4" />
+              Save UPI Settings
+            </button>
+          </div>
+        )}
         {/* Bank (India) Payment Option */}
         {activeMethod === 'bankIndia' && (
           <div className="space-y-6">
