@@ -85,3 +85,63 @@ USING (bucket_id = 'uploads');
 ```
 
 However, the service role approach is more secure as it uses your `SUPABASE_SERVICE_ROLE_KEY`.
+
+---
+
+# Videos (No Supabase Storage)
+
+Videos are **not** stored in Supabase Storage (storage is limited and large uploads via Vercel can fail). Instead:
+
+- Video **metadata** is stored in Supabase **Database** table `videos`
+- The actual video file should be hosted elsewhere (recommended: Cloudinary), or you can paste a direct video URL.
+
+## 1) Create the `videos` table (Supabase SQL)
+
+Run this in Supabase SQL Editor:
+
+```sql
+create table if not exists public.videos (
+  id text primary key,
+  title text not null,
+  description text,
+  video_url text not null,
+  thumbnail_url text,
+  duration integer not null default 1,
+  views integer not null default 0,
+  is_active boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists videos_created_at_idx on public.videos (created_at desc);
+```
+
+The API reads/writes using `SUPABASE_SERVICE_ROLE_KEY` (server-side), so it can manage videos without setting up Storage.
+
+## 2) Add video by URL (works without extra setup)
+
+In Admin → Media → Add Video:
+
+- Choose **Use Link**
+- Paste a direct `.mp4`/`.webm` URL
+
+## 3) Optional: Upload videos via Cloudinary (recommended)
+
+This uploads **directly from the browser to Cloudinary**, so it does not consume Supabase Storage and avoids Vercel upload limits.
+
+### Cloudinary env vars
+
+Add these env vars to Vercel (and your local `.env` if needed):
+
+- `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`
+- `NEXT_PUBLIC_CLOUDINARY_VIDEO_UPLOAD_PRESET`
+
+In Cloudinary:
+
+1) Create an **Unsigned Upload Preset**
+2) Restrict it (recommended): allowed formats + max file size
+
+Then in Admin → Media:
+
+- Choose **Upload**
+- Pick a video file → it uploads and fills the URL automatically
