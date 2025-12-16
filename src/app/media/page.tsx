@@ -47,7 +47,7 @@ export default function MediaPage() {
     try {
       const response = await fetch('/api/videos');
       const data = await response.json();
-      setVideos(data);
+      setVideos(Array.isArray(data) ? data.filter((v: any) => v?.isActive) : []);
     } catch (error) {
       console.error('Failed to fetch videos:', error);
     } finally {

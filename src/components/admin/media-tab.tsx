@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Plus, Edit, Trash2, Eye, Play, X, Upload } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { VideoUpload } from '@/components/video-upload';
 
 export interface Video {
   id: string;
@@ -293,18 +294,11 @@ export function MediaTab() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-zinc-300 mb-2">
-                  Video URL *
-                </label>
-                <input
-                  type="url"
-                  required
+                <VideoUpload
+                  label="Video"
                   value={formData.videoUrl}
-                  onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
-                  className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3 text-white placeholder-zinc-600 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500/50"
-                  placeholder="https://example.com/video.mp4"
+                  onChange={(url) => setFormData({ ...formData, videoUrl: url })}
                 />
-                <p className="text-xs text-zinc-500 mt-1">Direct link to video file (.mp4, .webm, etc.)</p>
               </div>
 
               <div>
