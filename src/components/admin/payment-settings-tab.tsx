@@ -13,7 +13,7 @@ interface BankDetails {
 
 interface PaymentSettings {
   id: string;
-  method: 'upi' | 'remitly' | 'paysend' | 'westernUnion' | 'amazonGiftCard' | 'crypto';
+  method: 'upi' | 'bankIndia' | 'remitly' | 'paysend' | 'westernUnion' | 'amazonGiftCard' | 'crypto';
   upiId?: string;
   bankDetails?: BankDetails;
   email?: string;
@@ -95,6 +95,15 @@ export function PaymentSettingsTab() {
 
       if (activeMethod === 'upi') {
         payload.upiId = formData.upiId;
+      } else if (activeMethod === 'bankIndia') {
+        if (formData.accountHolderName || formData.accountNumber || formData.ifscCode || formData.address) {
+          payload.bankDetails = {
+            accountHolderName: formData.accountHolderName,
+            accountNumber: formData.accountNumber,
+            ifscCode: formData.ifscCode,
+            address: formData.address,
+          };
+        }
       } else if (activeMethod === 'remitly' || activeMethod === 'paysend') {
         if (formData.upiId) payload.upiId = formData.upiId;
         if (formData.accountHolderName || formData.accountNumber) {
