@@ -41,6 +41,8 @@ export function ProductDetailClient({
 }) {
   const { addToCart } = useCart();
 
+  const imageUrl = product.image?.trim() || '';
+
   const handleAddToCart = () => {
     addToCart(product);
     toast.success(`${product.name} added to cart!`);
@@ -66,16 +68,25 @@ export function ProductDetailClient({
       <div className="mt-8 grid gap-10 lg:grid-cols-2">
         {/* Product image */}
         <div className="overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950 shadow-xl w-full max-w-md mx-auto lg:max-w-none lg:mx-0">
-          {product.image && product.image.trim() !== '' ? (
-            <div className="relative w-full min-h-[16rem] lg:min-h-0 lg:aspect-video">
+          {imageUrl ? (
+            <div className="relative w-full min-h-[16rem] lg:min-h-0 lg:aspect-video bg-zinc-900">
+              {/* Blurred background to fill container */}
               <Image
-                src={product.image}
+                src={imageUrl}
+                alt=""
+                fill
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="object-cover blur-2xl scale-110 opacity-50"
+                aria-hidden
+              />
+              {/* Foreground image fully visible */}
+              <Image
+                src={imageUrl}
                 alt={product.name}
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-cover"
+                className="object-contain"
                 priority
-                onError={(e) => { e.currentTarget.src = '/fallback.png'; }}
               />
             </div>
           ) : (

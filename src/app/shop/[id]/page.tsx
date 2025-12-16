@@ -4,10 +4,8 @@ import { fetchProducts, fetchProductById } from '@/lib/products';
 import { ProductDetailSkeleton } from '@/components/skeletons';
 import { ProductDetailClient } from './product-detail-client';
 
-export async function generateStaticParams() {
-  const products = await fetchProducts();
-  return products.map((p) => ({ id: p.id }));
-}
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 async function ProductContent({ id }: { id: string }) {
   const product = await fetchProductById(id);
