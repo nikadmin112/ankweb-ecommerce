@@ -1,22 +1,51 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Trash2, Tag } from 'lucide-react';
 import { useCart } from './cart-context';
 import { useCurrency } from './currency-context';
 import toast from 'react-hot-toast';
 
 export function CartSummary() {
-  const { items, removeFromCart, clearCart } = useCart();
+  const { items, removeFromCart, clearCart, addToCart } = useCart();
   const { formatPrice } = useCurrency();
   const [promoCode, setPromoCode] = useState('');
   const [appliedPromo, setAppliedPromo] = useState<any>(null);
   const [promoLoading, setPromoLoading] = useState(false);
+  const addingFreeItemRef = useRef(false);
 
   // Track when appliedPromo changes
   useEffect(() => {
     console.log('🔔 appliedPromo state changed:', appliedPromo);
   }, [appliedPromo]);
+
+  // Auto-add free service product to cart when promo is applied
+  useEffect(() => {
+    const freeProductId =
+      appliedPromo?.discount_type === 'free_service' ? appliedPromo?.free_product_id : null;
+
+    if (!freeProductId) return;
+    if (items.some((i) => i.id === freeProductId)) return;
+    if (addingFreeItemRef.current) return;
+
+    addingFreeItemRef.current = true;
+    (async () => {
+      try {
+        const res = await fetch(`/api/products/${freeProductId}`, { cache: 'no-store' });
+        if (!res.ok) {
+          console.error('❌ Failed to fetch free service product:', freeProductId);
+          return;
+        }
+        const product = await res.json();
+        addToCart(product);
+        toast.success('Free service added to cart');
+      } catch (err) {
+        console.error('❌ Error adding free service product:', err);
+      } finally {
+        addingFreeItemRef.current = false;
+      }
+    })();
+  }, [appliedPromo, items, addToCart]);
 
   const subtotal = items.reduce((sum, item) => {
     const itemPrice = item.discount ? item.price * (1 - item.discount / 100) : item.price;

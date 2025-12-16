@@ -10,7 +10,7 @@ import toast from 'react-hot-toast';
 import QRCode from 'qrcode';
 
 export default function CheckoutPage() {
-  const { items, clearCart } = useCart();
+  const { items, clearCart, addToCart } = useCart();
   const { user } = useAuth();
   const { formatPrice, currency } = useCurrency();
   const router = useRouter();
@@ -23,6 +23,7 @@ export default function CheckoutPage() {
   const [paymentConfirmed, setPaymentConfirmed] = useState(false);
   const [uploadingScreenshot, setUploadingScreenshot] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const addingFreeItemRef = useRef(false);
   const [orderTotal, setOrderTotal] = useState(0);
   const [expandedCountries, setExpandedCountries] = useState<string | null>(null);
   const [showPaymentDetails, setShowPaymentDetails] = useState(false);
@@ -109,6 +110,33 @@ export default function CheckoutPage() {
         .catch(err => console.error('Failed to load promo:', err));
     }
   }, []);
+
+  // Auto-add free service product to cart when promo is applied
+  useEffect(() => {
+    const freeProductId =
+      appliedPromo?.discount_type === 'free_service' ? appliedPromo?.free_product_id : null;
+
+    if (!freeProductId) return;
+    if (items.some((i) => i.id === freeProductId)) return;
+    if (addingFreeItemRef.current) return;
+
+    addingFreeItemRef.current = true;
+    (async () => {
+      try {
+        const res = await fetch(`/api/products/${freeProductId}`, { cache: 'no-store' });
+        if (!res.ok) {
+          console.error('❌ Failed to fetch free service product:', freeProductId);
+          return;
+        }
+        const product = await res.json();
+        addToCart(product);
+      } catch (err) {
+        console.error('❌ Error adding free service product:', err);
+      } finally {
+        addingFreeItemRef.current = false;
+      }
+    })();
+  }, [appliedPromo, items, addToCart]);
 
   // Fetch crypto coins and UPI settings on mount
   useEffect(() => {
