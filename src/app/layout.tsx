@@ -5,6 +5,7 @@ import { Providers } from './providers';
 import { Header } from '@/components/header';
 import { BackToTop } from '@/components/back-to-top';
 import { PWAInstaller } from '@/components/pwa-installer';
+import { SupportButton } from '@/components/support-button';
 import { Toaster } from 'react-hot-toast';
 
 const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], display: 'swap' });
@@ -31,6 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Header />
             {children}
             <BackToTop />
+            <SupportButton />
           </div>
           <Toaster
             position="bottom-right"
