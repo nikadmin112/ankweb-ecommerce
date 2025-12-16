@@ -14,30 +14,31 @@ export function CartSummary() {
   const [promoLoading, setPromoLoading] = useState(false);
   const addingFreeItemRef = useRef(false);
 
+  const freeServiceProductId =
+    appliedPromo?.discount_type === 'free_service' ? appliedPromo?.free_product_id : null;
+
   // Track when appliedPromo changes
   useEffect(() => {
     console.log('🔔 appliedPromo state changed:', appliedPromo);
   }, [appliedPromo]);
 
-  // Auto-add free service product to cart when promo is applied
+  // Auto-add free service product to cart when promo is applied (added as ₹0 item)
   useEffect(() => {
-    const freeProductId =
-      appliedPromo?.discount_type === 'free_service' ? appliedPromo?.free_product_id : null;
-
-    if (!freeProductId) return;
-    if (items.some((i) => i.id === freeProductId)) return;
+    if (!freeServiceProductId) return;
+    if (items.some((i) => i.id === freeServiceProductId)) return;
     if (addingFreeItemRef.current) return;
 
     addingFreeItemRef.current = true;
     (async () => {
       try {
-        const res = await fetch(`/api/products/${freeProductId}`, { cache: 'no-store' });
+        const res = await fetch(`/api/products/${freeServiceProductId}`, { cache: 'no-store' });
         if (!res.ok) {
-          console.error('❌ Failed to fetch free service product:', freeProductId);
+          console.error('❌ Failed to fetch free service product:', freeServiceProductId);
           return;
         }
         const product = await res.json();
-        addToCart(product);
+        // Add as truly free item (do NOT treat as monetary discount)
+        addToCart({ ...product, price: 0, discount: null });
         toast.success('Free service added to cart');
       } catch (err) {
         console.error('❌ Error adding free service product:', err);
@@ -45,7 +46,7 @@ export function CartSummary() {
         addingFreeItemRef.current = false;
       }
     })();
-  }, [appliedPromo, items, addToCart]);
+  }, [freeServiceProductId, items, addToCart]);
 
   const subtotal = items.reduce((sum, item) => {
     const itemPrice = item.discount ? item.price * (1 - item.discount / 100) : item.price;
@@ -102,17 +103,13 @@ export function CartSummary() {
         console.log('⚠️ BOGO requires 2+ items or 1 item with qty >= 2');
       }
     } else if (appliedPromo.discount_type === 'free_service' && appliedPromo.free_product_id) {
+      // For free_service we add the free product as ₹0; no monetary discount should be shown.
       const freeProduct = items.find(i => i.id === appliedPromo.free_product_id);
-      console.log(`🔍 Looking for product ${appliedPromo.free_product_id}, found:`, freeProduct);
+      console.log(`🔍 Looking for free_service product ${appliedPromo.free_product_id}, found:`, freeProduct);
       if (freeProduct) {
-        const freePrice = freeProduct.discount 
-          ? freeProduct.price * (1 - freeProduct.discount / 100) 
-          : freeProduct.price;
         freeItems = [freeProduct];
-        discount = freePrice;
-        console.log(`✅ Free service discount: ${freeProduct.name} = ₹${freePrice}`);
-      } else {
-        console.log('⚠️ Free product not in cart');
+        discount = 0;
+        console.log(`✅ Free service applied: ${freeProduct.name} marked FREE`);
       }
     } else if (appliedPromo.discount_type === 'free_service' && !appliedPromo.free_product_id) {
       console.log('⚠️ Free service promo missing product ID');

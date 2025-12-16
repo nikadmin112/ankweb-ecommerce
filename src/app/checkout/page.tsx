@@ -79,12 +79,9 @@ export default function CheckoutPage() {
         const cheapestPrice = cheapestItem.discount ? cheapestItem.price * (1 - cheapestItem.discount / 100) : cheapestItem.price;
         discount = cheapestPrice;
       }
-    } else if (appliedPromo.discount_type === 'free_service' && appliedPromo.free_product_id) {
-      const freeProduct = items.find(i => i.id === appliedPromo.free_product_id);
-      if (freeProduct) {
-        const freePrice = freeProduct.discount ? freeProduct.price * (1 - freeProduct.discount / 100) : freeProduct.price;
-        discount = freePrice;
-      }
+    } else if (appliedPromo.discount_type === 'free_service') {
+      // free_service is handled by adding the configured product as a ₹0 cart item.
+      discount = 0;
     }
   }
 
@@ -129,7 +126,8 @@ export default function CheckoutPage() {
           return;
         }
         const product = await res.json();
-        addToCart(product);
+        // Add as truly free item (do NOT treat as monetary discount)
+        addToCart({ ...product, price: 0, discount: null });
       } catch (err) {
         console.error('❌ Error adding free service product:', err);
       } finally {
