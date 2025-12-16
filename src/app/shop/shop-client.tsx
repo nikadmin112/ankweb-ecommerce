@@ -14,7 +14,7 @@ interface ShopClientProps {
   onFilterChange: (filters: FilterState) => void;
 }
 
-const PRODUCTS_PER_PAGE = 6;
+const PRODUCTS_PER_PAGE = 20;
 
 export function ShopClient({ initialProducts, categories, filters, onFilterChange }: ShopClientProps) {
   const [currentPage, setCurrentPage] = useState(1);
