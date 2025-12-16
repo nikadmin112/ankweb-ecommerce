@@ -65,9 +65,9 @@ export function ProductDetailClient({
 
       <div className="mt-8 grid gap-10 lg:grid-cols-2">
         {/* Product image */}
-        <div className="overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950 shadow-xl w-full max-w-md mx-auto">
+        <div className="overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950 shadow-xl w-full max-w-md mx-auto lg:max-w-none lg:mx-0">
           {product.image && product.image.trim() !== '' ? (
-            <div className="relative w-full min-h-[16rem]">
+            <div className="relative w-full min-h-[16rem] lg:min-h-0 lg:aspect-video">
               <Image
                 src={product.image}
                 alt={product.name}
