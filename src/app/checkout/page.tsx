@@ -41,6 +41,7 @@ export default function CheckoutPage() {
     email: user?.email || '',
     phone: '',
     paymentNationality: 'indian' as 'indian' | 'international' | 'crypto',
+    indianMethod: 'upi' as 'upi' | 'bankIndia',
     internationalMethod: '' as 'gift-card' | 'remitly' | 'paysend' | 'western-union' | '',
     notes: '',
   });
@@ -149,6 +150,13 @@ export default function CheckoutPage() {
     }
   }, [formData.internationalMethod]);
 
+  // Fetch bank details when Indian bank transfer is selected
+  useEffect(() => {
+    if (formData.paymentNationality === 'indian' && formData.indianMethod === 'bankIndia') {
+      fetchPaymentSettings('bankIndia');
+    }
+  }, [formData.paymentNationality, formData.indianMethod]);
+
   const fetchCryptoCoins = async () => {
     try {
       const response = await fetch('/api/crypto-coins');
@@ -179,10 +187,12 @@ export default function CheckoutPage() {
       if (response.ok) {
         const data = await response.json();
         setPaymentSettings(data);
+        return data;
       }
     } catch (error) {
       console.error('Failed to fetch payment settings:', error);
     }
+    return null;
   };
 
   const handleScreenshotSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -302,7 +312,7 @@ export default function CheckoutPage() {
 
     try {
       // Determine payment method label
-      let paymentMethodLabel = 'UPI Payment';
+      let paymentMethodLabel = formData.indianMethod === 'bankIndia' ? 'Bank Transfer (India)' : 'UPI (India)';
       if (formData.paymentNationality === 'international') {
         const methodLabels = {
           'gift-card': 'Amazon India Gift Card',
@@ -359,12 +369,20 @@ export default function CheckoutPage() {
       
       // Handle different payment methods
       if (formData.paymentNationality === 'indian') {
-        // Indian UPI payment
-        await generateQRCode(total);
-        setShowQR(true);
-        setTimeRemaining(120);
-        clearCart();
-        toast.success('Order placed! Please scan QR code to pay.');
+        if (formData.indianMethod === 'bankIndia') {
+          // Indian Bank Transfer
+          await fetchPaymentSettings('bankIndia');
+          clearCart();
+          setShowPaymentDetails(true);
+          toast.success('Order placed! Please complete bank transfer and upload proof.');
+        } else {
+          // Indian UPI payment
+          await generateQRCode(total);
+          setShowQR(true);
+          setTimeRemaining(120);
+          clearCart();
+          toast.success('Order placed! Please scan QR code to pay.');
+        }
       } else if (formData.internationalMethod === 'gift-card') {
         // Amazon Gift Card - redirect and show screenshot modal
         clearCart();
@@ -559,23 +577,66 @@ export default function CheckoutPage() {
               
               <div className="space-y-3">
                 {/* Indian Payment */}
-                <label className="flex items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-900 p-4 cursor-pointer hover:border-purple-500/50 transition">
-                  <input
-                    type="radio"
-                    name="paymentNationality"
-                    value="indian"
-                    checked={formData.paymentNationality === 'indian'}
-                    onChange={(e) => setFormData({ ...formData, paymentNationality: 'indian', internationalMethod: '' })}
-                    className="text-purple-600 focus:ring-purple-500"
-                  />
-                  <div className="flex-1">
-                    <p className="font-semibold text-white flex items-center gap-2">
-                      <MapPin className="h-4 w-4" />
-                      Indian Payment
-                    </p>
-                    <p className="text-xs text-zinc-500">Pay via UPI (QR Code)</p>
-                  </div>
-                </label>
+                <div className="rounded-lg border border-zinc-800 bg-zinc-900">
+                  <label className="flex items-center gap-3 p-4 cursor-pointer hover:bg-zinc-800/50 transition rounded-t-lg">
+                    <input
+                      type="radio"
+                      name="paymentNationality"
+                      value="indian"
+                      checked={formData.paymentNationality === 'indian'}
+                      onChange={() =>
+                        setFormData({
+                          ...formData,
+                          paymentNationality: 'indian',
+                          internationalMethod: '',
+                          indianMethod: formData.indianMethod || 'upi',
+                        })
+                      }
+                      className="text-purple-600 focus:ring-purple-500"
+                    />
+                    <div className="flex-1">
+                      <p className="font-semibold text-white flex items-center gap-2">
+                        <MapPin className="h-4 w-4" />
+                        Indian Payment
+                      </p>
+                      <p className="text-xs text-zinc-500">Choose UPI or Bank Transfer</p>
+                    </div>
+                  </label>
+
+                  {formData.paymentNationality === 'indian' && (
+                    <div className="border-t border-zinc-800 p-4 space-y-3">
+                      <label className="flex items-start gap-3 p-3 rounded-lg border border-zinc-700 bg-zinc-800/50 cursor-pointer hover:border-purple-500/50 transition">
+                        <input
+                          type="radio"
+                          name="indianMethod"
+                          value="upi"
+                          checked={formData.indianMethod === 'upi'}
+                          onChange={() => setFormData({ ...formData, indianMethod: 'upi' })}
+                          className="mt-0.5 text-purple-600 focus:ring-purple-500"
+                        />
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-white">UPI</p>
+                          <p className="text-xs text-zinc-400 mt-1">Pay via UPI (QR Code)</p>
+                        </div>
+                      </label>
+
+                      <label className="flex items-start gap-3 p-3 rounded-lg border border-zinc-700 bg-zinc-800/50 cursor-pointer hover:border-purple-500/50 transition">
+                        <input
+                          type="radio"
+                          name="indianMethod"
+                          value="bankIndia"
+                          checked={formData.indianMethod === 'bankIndia'}
+                          onChange={() => setFormData({ ...formData, indianMethod: 'bankIndia' })}
+                          className="mt-0.5 text-purple-600 focus:ring-purple-500"
+                        />
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-white">Bank Transfer</p>
+                          <p className="text-xs text-zinc-400 mt-1">Pay to our Indian bank account</p>
+                        </div>
+                      </label>
+                    </div>
+                  )}
+                </div>
 
                 {/* International Payment */}
                 <div className="rounded-lg border border-zinc-800 bg-zinc-900">
@@ -585,7 +646,7 @@ export default function CheckoutPage() {
                       name="paymentNationality"
                       value="international"
                       checked={formData.paymentNationality === 'international'}
-                      onChange={(e) => setFormData({ ...formData, paymentNationality: 'international' })}
+                      onChange={() => setFormData({ ...formData, paymentNationality: 'international' })}
                       className="text-purple-600 focus:ring-purple-500"
                     />
                     <div className="flex-1">
@@ -794,7 +855,7 @@ export default function CheckoutPage() {
                       name="paymentNationality"
                       value="crypto"
                       checked={formData.paymentNationality === 'crypto'}
-                      onChange={(e) => {
+                      onChange={() => {
                         setFormData({ ...formData, paymentNationality: 'crypto', internationalMethod: '' });
                         setSelectedCoin(null);
                         setSelectedNetwork(null);
@@ -1132,7 +1193,9 @@ export default function CheckoutPage() {
             </button>
 
             <h3 className="text-2xl font-semibold text-white mb-6">
-              {formData.internationalMethod === 'remitly' ? 'Remitly' : 'Paysend'} Payment Details
+              {formData.paymentNationality === 'indian'
+                ? (formData.indianMethod === 'bankIndia' ? 'Bank Transfer (India) Details' : 'UPI (India) Details')
+                : (formData.internationalMethod === 'remitly' ? 'Remitly Payment Details' : 'Paysend Payment Details')}
             </h3>
 
             <div className="space-y-4">
@@ -1204,7 +1267,7 @@ export default function CheckoutPage() {
 
               <div className="bg-yellow-600/10 border border-yellow-600/30 rounded-lg p-4">
                 <p className="text-xs text-yellow-400">
-                  After completing payment, click "Place Order" and upload screenshot as proof.
+                  After completing payment, upload screenshot proof to confirm your order.
                 </p>
               </div>
 

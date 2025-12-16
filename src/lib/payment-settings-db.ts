@@ -9,7 +9,7 @@ export interface BankDetails {
 
 export interface PaymentSettings {
   id: string;
-  method: 'remitly' | 'paysend' | 'westernUnion' | 'amazonGiftCard' | 'crypto';
+  method: 'upi' | 'bankIndia' | 'remitly' | 'paysend' | 'westernUnion' | 'amazonGiftCard' | 'crypto';
   upiId?: string;
   bankDetails?: BankDetails;
   email?: string; // For Amazon Gift Card
