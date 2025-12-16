@@ -171,7 +171,7 @@ export default function CheckoutPage() {
 
   const fetchUpiSettings = async () => {
     try {
-      const response = await fetch('/api/payment-settings/upi');
+      const response = await fetch('/api/payment-settings/upi', { cache: 'no-store' });
       if (response.ok) {
         const data = await response.json();
         setUpiSettings(data);
@@ -183,7 +183,7 @@ export default function CheckoutPage() {
 
   const fetchPaymentSettings = async (method: string) => {
     try {
-      const response = await fetch(`/api/payment-settings/${method}`);
+      const response = await fetch(`/api/payment-settings/${method}`, { cache: 'no-store' });
       if (response.ok) {
         const data = await response.json();
         setPaymentSettings(data);
