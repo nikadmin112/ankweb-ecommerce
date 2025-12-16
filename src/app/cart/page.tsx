@@ -13,16 +13,15 @@ export default function CartPage() {
   const [promoCode, setPromoCode] = useState('');
   const [appliedPromo, setAppliedPromo] = useState<any>(null);
   const [promoLoading, setPromoLoading] = useState(false);
-  const [freeServiceProduct, setFreeServiceProduct] = useState<any>(null);
 
-  const subtotal = items.reduce((sum, item) => {
-    const itemPrice = item.discount ? item.price * (1 - item.discount / 100) : item.price;
+  const subtotal = items.reduce((sum, item: any) => {
+    const basePrice = item.isPromoFree ? 0 : item.price;
+    const itemPrice = item.discount ? basePrice * (1 - item.discount / 100) : basePrice;
     return sum + itemPrice * item.quantity;
   }, 0);
 
   let discount = 0;
   let freeItems: any[] = [];
-  let displayItems = [...items];
 
   if (appliedPromo) {
     console.log('🎫 Cart Page - Promo applied:', appliedPromo);
@@ -58,24 +57,9 @@ export default function CartPage() {
         discount = cheapestPrice;
         console.log(`✅ BOGO (different products): ${cheapestItem.name} free = ${discount}`);
       }
-    } else if (appliedPromo.discount_type === 'free_service' && appliedPromo.free_product_id) {
-      // Find product in cart or fetch it
-      const existingProduct = items.find(i => i.id === appliedPromo.free_product_id);
-      if (existingProduct) {
-        freeItems = [existingProduct];
-        const freePrice = existingProduct.discount 
-          ? existingProduct.price * (1 - existingProduct.discount / 100) 
-          : existingProduct.price;
-        discount = freePrice;
-        console.log(`✅ Free service in cart: ${existingProduct.name} = ${discount}`);
-      } else if (freeServiceProduct) {
-        displayItems = [...items, { ...freeServiceProduct, quantity: 1, isPromoFree: true }];
-        const freePrice = freeServiceProduct.discount 
-          ? freeServiceProduct.price * (1 - freeServiceProduct.discount / 100) 
-          : freeServiceProduct.price;
-        discount = freePrice;
-        console.log(`✅ Free service added: ${freeServiceProduct.name} = ${discount}`);
-      }
+    } else if (appliedPromo.discount_type === 'free_service') {
+      // free_service is modeled as an added free item (price 0), not a monetary discount.
+      discount = 0;
     }
     console.log('💰 Final discount:', discount);
   }
@@ -109,17 +93,18 @@ export default function CartPage() {
           return;
         }
 
-        // If free service, fetch the product details
+        // If free service, fetch the product and add it to cart as ₹0
         if (promo.discount_type === 'free_service' && promo.free_product_id) {
-          const productsResponse = await fetch('/api/products');
-          const products = await productsResponse.json();
-          const freeProduct = products.find((p: any) => p.id === promo.free_product_id);
-          if (freeProduct) {
-            setFreeServiceProduct(freeProduct);
-          } else {
-            toast.error('Free product not found');
-            setPromoLoading(false);
-            return;
+          const existing = items.find((i: any) => i.id === promo.free_product_id);
+          if (!existing) {
+            const freeRes = await fetch(`/api/products/${promo.free_product_id}`, { cache: 'no-store' });
+            if (!freeRes.ok) {
+              toast.error('Free product not found');
+              setPromoLoading(false);
+              return;
+            }
+            const freeProduct = await freeRes.json();
+            addToCart({ ...freeProduct, promoOriginalPrice: freeProduct.price, price: 0, isPromoFree: true });
           }
         }
         setAppliedPromo(promo);
@@ -148,9 +133,14 @@ export default function CartPage() {
   };
 
   const removePromo = () => {
+    if (appliedPromo?.discount_type === 'free_service' && appliedPromo?.free_product_id) {
+      const promoItem = items.find((i: any) => i.id === appliedPromo.free_product_id && i.isPromoFree);
+      if (promoItem) {
+        removeFromCart(appliedPromo.free_product_id);
+      }
+    }
     setAppliedPromo(null);
     setPromoCode('');
-    setFreeServiceProduct(null);
     toast.success('Promo code removed');
   };
 
@@ -200,9 +190,10 @@ export default function CartPage() {
 
       <div className="grid gap-8 lg:grid-cols-[1.5fr_1fr]">
         <div className="space-y-4">
-          {displayItems.map((item: any) => {
+          {items.map((item: any) => {
             const isFree = freeItems.some(f => f.id === item.id) || item.isPromoFree;
             const itemPrice = item.discount ? item.price * (1 - item.discount / 100) : item.price;
+            const mrpPrice = typeof item.promoOriginalPrice === 'number' ? item.promoOriginalPrice : itemPrice;
             
             return (
               <article
@@ -226,7 +217,7 @@ export default function CartPage() {
                           </span>
                         </div>
                         <p className="text-sm text-zinc-500">
-                          M.R.P: <span className="line-through">{formatPrice(itemPrice)}</span>
+                          M.R.P: <span className="line-through">{formatPrice(mrpPrice)}</span>
                         </p>
                       </>
                     ) : (
