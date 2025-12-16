@@ -97,7 +97,19 @@ export function ProductGrid({ products }: { products: Product[] }) {
 
                 {/* Product Image */}
                 {product.image ? (
-                  <div className="relative h-40 sm:h-48 w-full overflow-hidden bg-zinc-900">
+                  <div className="relative w-full aspect-square overflow-hidden bg-zinc-900">
+                    {/* Blurred background fill */}
+                    <Image
+                      src={product.image}
+                      alt=""
+                      fill
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                      loading="lazy"
+                      quality={60}
+                      className="object-cover blur-2xl scale-110 opacity-50"
+                      aria-hidden
+                    />
+                    {/* Foreground: show full image */}
                     <Image
                       src={product.image}
                       alt={product.name}
@@ -105,7 +117,7 @@ export function ProductGrid({ products }: { products: Product[] }) {
                       sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                       loading="lazy"
                       quality={85}
-                      className="object-cover transition duration-300 group-hover:scale-105"
+                      className="object-contain transition duration-300 group-hover:scale-105"
                     />
                   </div>
                 ) : (

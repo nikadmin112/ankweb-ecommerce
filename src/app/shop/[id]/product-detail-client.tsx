@@ -69,23 +69,27 @@ export function ProductDetailClient({
         {/* Product image */}
         <div className="overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950 shadow-xl w-full max-w-md mx-auto lg:max-w-none lg:mx-0">
           {imageUrl ? (
-            <div className="relative w-full min-h-[16rem] lg:min-h-0 lg:aspect-video bg-zinc-900">
-              {/* Blurred background to fill container */}
-              <Image
-                src={imageUrl}
-                alt=""
-                fill
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-cover blur-2xl scale-110 opacity-50"
-                aria-hidden
-              />
-              {/* Foreground image fully visible */}
+            <div className="relative w-full bg-zinc-900">
+              {/* Blurred background fills whatever height the image ends up taking */}
+              <div className="absolute inset-0">
+                <Image
+                  src={imageUrl}
+                  alt=""
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  className="object-cover blur-2xl scale-110 opacity-50"
+                  aria-hidden
+                />
+              </div>
+
+              {/* Foreground image: always fully visible */}
               <Image
                 src={imageUrl}
                 alt={product.name}
-                fill
+                width={1200}
+                height={1200}
                 sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-contain"
+                className="relative w-full h-auto object-contain"
                 priority
               />
             </div>
